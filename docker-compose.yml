@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soul_frontend
+    ports:
+      - "8080:80"
