@@ -1,0 +1,1525 @@
+<title>SOUL Build Scope</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  /* ---- Tokens: complete light palette on bare :root ---- */
+  :root {
+    --ground:      #e7e1d5;
+    --surface:     #f0ebe1;
+    --surface-2:   #dcd5c6;
+    --line:        #c6bda9;
+    --line-soft:   #d5cdbb;
+    --ink:         #22252b;
+    --ink-2:       #4c4f57;
+    --muted:       #6f7078;
+    --alien:       #7a3ec4;   /* the wrong sky */
+    --alien-soft:  #7a3ec41f;
+    --caatinga:    #4e7a24;   /* mandacaru */
+    --earth:       #a6621f;   /* dust, unfinished art */
+    --shadow:      0 1px 0 #00000010;
+
+    --display: 'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
+    --body: 'Newsreader', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:     #131519;
+      --surface:    #1a1d23;
+      --surface-2:  #23272f;
+      --line:       #333944;
+      --line-soft:  #262b33;
+      --ink:        #e9e3d5;
+      --ink-2:      #c2bcae;
+      --muted:      #8d8c86;
+      --alien:      #c084f5;
+      --alien-soft: #c084f524;
+      --caatinga:   #9ccc5e;
+      --earth:      #d99b52;
+      --shadow:     0 1px 0 #00000040;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:     #131519;
+    --surface:    #1a1d23;
+    --surface-2:  #23272f;
+    --line:       #333944;
+    --line-soft:  #262b33;
+    --ink:        #e9e3d5;
+    --ink-2:      #c2bcae;
+    --muted:      #8d8c86;
+    --alien:      #c084f5;
+    --alien-soft: #c084f524;
+    --caatinga:   #9ccc5e;
+    --earth:      #d99b52;
+    --shadow:     0 1px 0 #00000040;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 18px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: clamp(40px, 7vw, 88px) clamp(20px, 5vw, 40px) 120px;
+  }
+
+  /* ---- Type ---- */
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+  h1 {
+    font-size: clamp(38px, 7.5vw, 68px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+  }
+  h2 {
+    font-size: clamp(23px, 3.4vw, 30px);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  h3 {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    margin-bottom: 2px;
+  }
+  p { margin: 0; max-width: var(--measure); }
+  a { color: var(--alien); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--alien);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  strong { font-weight: 500; color: var(--ink); }
+  code, .mono { font-family: var(--mono); font-size: 0.84em; }
+  code {
+    background: var(--surface-2);
+    padding: 0.1em 0.36em;
+    border-radius: 3px;
+    color: var(--ink-2);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- Rhythm ---- */
+  .stack { display: flex; flex-direction: column; }
+  .stack-3 { gap: 12px; }
+  .stack-4 { gap: 18px; }
+  .stack-6 { gap: 30px; }
+
+  section { margin-top: 68px; }
+  section > .stack-6 { margin-top: 22px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--alien);
+    letter-spacing: 0.08em;
+  }
+
+  /* ---- Hero ---- */
+  header { padding-bottom: 6px; }
+  .premise {
+    font-size: clamp(19px, 2.4vw, 22px);
+    font-style: italic;
+    color: var(--ink-2);
+    border-left: 2px solid var(--alien);
+    padding-left: 20px;
+    margin: 26px 0 0;
+    max-width: 56ch;
+  }
+  .deck {
+    margin-top: 26px;
+    font-size: 19px;
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+  }
+
+  /* ---- Status chips ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .chip::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .chip.done  { color: var(--caatinga); background: color-mix(in srgb, var(--caatinga) 13%, transparent); }
+  .chip.holds { color: var(--earth);    background: color-mix(in srgb, var(--earth) 15%, transparent); }
+  .chip.none  { color: var(--muted);    background: color-mix(in srgb, var(--muted) 15%, transparent); }
+  .chip.art   { color: var(--alien);    background: var(--alien-soft); }
+
+  .statusgrid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .statusgrid > div {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex;
+    align-items: center;
+  }
+  .statusgrid > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .statusgrid .lbl { font-size: 16.5px; color: var(--ink-2); }
+  .statusgrid .val { justify-content: flex-end; }
+
+  /* ---- Tables ---- */
+  .callout {
+    border-left: 3px solid var(--earth);
+    background: var(--alien-soft);
+    padding: 14px 18px;
+    margin: 0;
+  }
+
+  .scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+  th, td {
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-2); }
+
+  /* ---- The road diagram ---- */
+  .roadfig { margin: 0; }
+  .roadfig svg { display: block; width: 100%; height: auto; }
+  .roadfig text { font-family: var(--mono); letter-spacing: 0.06em; }
+  .roadfig .t-act text { font-family: var(--display); font-weight: 600; letter-spacing: 0; }
+  .roadfig .t-place text { font-family: var(--body); letter-spacing: 0; }
+  figcaption { font-size: 14.5px; color: var(--muted); margin-top: 10px; max-width: var(--measure); }
+
+  /* ---- Callout / findings ---- */
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .finding p { font-size: 16.5px; }
+  .finding p + p { margin-top: 10px; }
+  .finding .fix { color: var(--muted); font-style: italic; }
+
+  /* ---- Lists ---- */
+  ol.ranked, ul.plain { margin: 0; padding: 0; list-style: none; }
+  ol.ranked { counter-reset: r; }
+  ol.ranked li {
+    counter-increment: r;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 16.5px;
+  }
+  ol.ranked li:last-child { border-bottom: 0; }
+  ol.ranked li::before {
+    content: counter(r);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--alien);
+    padding-top: 4px;
+  }
+  ul.plain li {
+    padding-left: 20px;
+    position: relative;
+    font-size: 16.5px;
+  }
+  ul.plain li + li { margin-top: 7px; }
+  ul.plain li::before {
+    content: "";
+    position: absolute;
+    left: 2px; top: 0.68em;
+    width: 6px; height: 1px;
+    background: var(--muted);
+  }
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 26px; }
+  .col h3 { margin-bottom: 8px; }
+
+  pre {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  .decision { border-top: 1px solid var(--line-soft); padding-top: 16px; }
+  .decision:first-child { border-top: 0; padding-top: 0; }
+  .decision .q { font-family: var(--display); font-weight: 600; font-size: 18px; }
+  .decision p { font-size: 16.5px; color: var(--ink-2); margin-top: 4px; }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    .statusgrid { grid-template-columns: 1fr auto; }
+    .statusgrid > div { padding: 9px 12px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Escopo de produção &middot; v0.1 &middot; MVP jogável</div>
+    <h1>SOUL</h1>
+    <p class="premise">
+      Floriano, Piauí. O céu abriu e eles desceram. Levaram o Soul — amigo,
+      escudeiro e a mais bela dama em perigo do Piauí. O Indígena carregou o
+      revólver e pegou a estrada.
+    </p>
+    <p class="deck">
+      A Vampire-Survivors-like where the only weapon is the protagonist's
+      revolver. React + TypeScript + Canvas 2D, no game engine, deploys to
+      Vercel as a static site.
+    </p>
+    <div class="tagrow">
+      <span class="tag">3 acts, no loading screens</span>
+      <span class="tag">~2–3 min per run</span>
+      <span class="tag">22 upgrade cards</span>
+      <span class="tag">700 enemies</span>
+      <span class="tag">auto-fire, mouse-steered</span>
+      <span class="tag">keyboard · mouse · touch</span>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Where it is now</h2></div>
+    <div class="stack stack-6">
+      <p>
+        The game is playable end to end: three acts, seamless transitions,
+        <strong>two</strong> boss fights, level-ups, win and lose states. A full
+        run is about four minutes. Everything below was
+        measured by driving the simulation directly from the console rather than
+        by watching it — the loop is frame-rate independent, so a bot can play a
+        real run instantly.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Check</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Act I → II at world X 10 500</td>
+              <td>Passes. No reload; the ground has been cross-fading for 800 units already.</td>
+            </tr>
+            <tr>
+              <td>Act II → III at world X 22 000</td>
+              <td>Passes. Barrier closes, camera parks on the square, boss spawns.</td>
+            </tr>
+            <tr>
+              <td><strong>A Manifestação</strong> — the Act I boss</td>
+              <td>Field swept on spawn. The arena centres itself on the road (resolved Y 182 = road Y 182). 64 flags in the air at peak, minions capped at 6. Killing it <strong>opens the road</strong> rather than ending the run.</td>
+            </tr>
+            <tr>
+              <td>Boss defeat → <em>vitória</em></td>
+              <td>Passes.</td>
+            </tr>
+            <tr>
+              <td>Twelve runs at the Act I boss, bot kiting and dodging</td>
+              <td><strong>Clears 7 of 12</strong>, average fight <strong>34 s</strong>, ending around 46 HP. Losses die with 17–44% of the bar left.</td>
+            </tr>
+            <tr>
+              <td>All 14 species reachable in one run</td>
+              <td>Passes — verified against a full instrumented run.</td>
+            </tr>
+            <tr>
+              <td>A full run, start to <em>vitória</em></td>
+              <td>4:22, level 15, 264 kills.</td>
+            </tr>
+            <tr>
+              <td>415 enemies on screen</td>
+              <td><strong>1.08 ms per full frame</strong> (simulation + render). About 15× headroom at 60 fps.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:8px">On the difficulty, deliberately</h3>
+      <p>
+        Contact damage is roughly <strong>double</strong> what it was and health
+        went up alongside it, so <strong>any contact is a real event</strong>: at
+        100 starting health, four or five touches is the whole bar, and i-frames
+        cap a crowd at two hits a second. A run can no longer be won by
+        strolling into a herd and shooting outward.
+      </p>
+      <p>
+        Density came <em>down</em> as damage went up, in both Floriano and the
+        church square. Density and damage multiply, and both act tables had been
+        written when a touch cost eight; at double that, the same crowd stopped
+        being a fight and became a wall. The danger is meant to be in what one
+        alien can do to you rather than in how many are on screen.
+      </p>
+      <p class="callout">
+        <strong>The health and damage values in <code>enemies.ts</code> are
+        hand-tuned and sit well above anything measured here.</strong> The bot
+        percentages on this page were taken mid-pass on lower numbers. Treat
+        them as evidence about the <em>shape</em> of the difficulty &mdash; that
+        kiting doubles a clear rate, that survival rather than boss health
+        decides a boss fight &mdash; never as a description of how hard the game
+        currently is. Re-measure before quoting a win rate.
+      </p>
+
+      <h3 style="margin-top:8px">You aim it now</h3>
+      <p>
+        <strong>The revolver no longer picks a target.</strong> It fires along
+        the cursor and hits whatever is in the way, or nothing at all. The gun
+        still fires on its own &mdash; you never click &mdash; so all of the
+        skill sits in where it is pointed.
+      </p>
+      <p>
+        The old assist chose a target for you and used the cursor only as a
+        <em>weighting</em> on that choice. It had one fatal property: you could
+        not miss, which also meant you could not deliberately hit anything.
+        Steering the assist was a preference; aiming is a skill. Touch and
+        keyboard-only play fall back to nearest-target, because there is no
+        cursor to aim with.
+      </p>
+      <p class="callout">
+        <strong>This makes the bot numbers below much weaker evidence than they
+        were.</strong> Every bot on this page steers a cursor with crude
+        heuristics, and manual aim punishes that far harder than it punishes a
+        person. Kill counts more than halved the moment the assist came out;
+        that measures the bot, not the game.
+      </p>
+
+      <h3 style="margin-top:8px">What the cursor was worth, under the old assist</h3>
+      <p>
+        The revolver fires on its own, but the mouse decides which way it looks.
+        Measured directly — fixed build, twenty seconds of fire at O Noivo with
+        his guests around him:
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Aiming</th><th>Damage dealt to the boss</th></tr></thead>
+          <tbody>
+            <tr><td>Cursor held on the boss</td><td class="num"><strong>3 127</strong></td></tr>
+            <tr><td>No cursor at all — plain nearest-target</td><td class="num">918</td></tr>
+            <tr><td>Boss alone, nothing else to shoot</td><td class="num">3 151</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Pointing at the boss is worth <strong>3.4×</strong> the damage, because
+        otherwise the revolver spends the whole fight on whichever guest happens
+        to be nearest. That gap is the skill curve of the weapon, and it carries
+        through to whole runs:
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>How the bot uses the mouse</th><th>Wins</th></tr></thead>
+          <tbody>
+            <tr><td>Tracks the nearest threat, locks on the boss</td><td class="num">4 / 8</td></tr>
+            <tr><td>No mouse at all</td><td class="num">3 / 6</td></tr>
+            <tr><td>Holds the cursor rigidly due east</td><td class="num">1 / 6</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Good pointing beats no pointing beats bad pointing, which is what a
+        steering mechanic should do. Note the middle row: someone who never
+        touches the mouse still has a real game, they just have no say in it.
+      </p>
+
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px">Real vs. placeholder</div>
+        <div class="statusgrid">
+          <div class="lbl">Fixed-timestep loop, camera, input</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Procedural world, biome blend, road generation</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Spawning, 9 AI behaviours, crowd separation</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Rare world items, found off the road</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Paced bestiary, forward pressure, waves</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Player barks &mdash; he reacts to each new species</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Revolver, XP, level-up cards — 34 upgrades</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Seven timed abilities, with a live cooldown strip</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Two bosses, 3 phases each, arena lock, win/lose</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Capped builds &mdash; 4 powers + 4 stats</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Sorte &mdash; rarity tiers, crits, gambles, drop rate</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Colete (armour) and Escudo Alien (absorb charges)</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Sealed arenas &mdash; a fight that admits nothing but the boss</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">HUD, menus, level-up screen</div>
+          <div class="val"><span class="chip done">Done</span></div>
+          <div class="lbl">Player sprites, ground and road tiles</div>
+          <div class="val"><span class="chip art">Your art, in game</span></div>
+          <div class="lbl">Upgrade card icons — 13 of 15 assigned</div>
+          <div class="val"><span class="chip art">Your art, in game</span></div>
+          <div class="lbl">Milho and pão pickups</div>
+          <div class="val"><span class="chip art">Your art, in game</span></div>
+          <div class="lbl">Enemy sprites — 13 of 14 species</div>
+          <div class="val"><span class="chip art">Your art, in game</span></div>
+          <div class="lbl">O Noivo Cinzento</div>
+          <div class="val"><span class="chip holds">The last placeholder</span></div>
+          <div class="lbl">Scenery — cactus, houses, lamps, church</div>
+          <div class="val"><span class="chip holds">Flat shapes</span></div>
+          <div class="lbl">Soul himself</div>
+          <div class="val"><span class="chip none">Not in yet</span></div>
+          <div class="lbl">Sound</div>
+          <div class="val"><span class="chip none">None</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>The three acts</h2></div>
+    <div class="stack stack-6">
+      <p>
+        There is <strong>no level loading</strong>. The world is one continuous
+        space and the act is a function of how far east you have walked.
+        Crossing a threshold swaps the spawn table and fades in a title card —
+        that is the entire transition. Nothing is torn down and rebuilt.
+      </p>
+
+      <figure class="roadfig">
+        <svg viewBox="0 0 860 200" role="img" aria-label="The journey from world X zero to sixteen thousand four hundred: Act I caatinga, a biome cross-fade at six thousand one hundred, Act II town, and the church arena at fifteen thousand.">
+          <!-- ground bands -->
+          <rect x="40" y="86" width="330" height="26" fill="var(--caatinga)" opacity="0.22"/>
+          <rect x="370" y="86" width="60" height="26" fill="var(--earth)" opacity="0.16"/>
+          <rect x="430" y="86" width="330" height="26" fill="var(--earth)" opacity="0.26"/>
+          <rect x="760" y="86" width="60" height="26" fill="var(--alien)" opacity="0.20"/>
+
+          <!-- the road itself, meandering then straightening -->
+          <path d="M40 104 C 120 92, 190 116, 265 100 S 400 88, 480 99 L 760 99"
+                fill="none" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
+          <!-- arena -->
+          <rect x="760" y="72" width="60" height="54" fill="none" stroke="var(--alien)" stroke-width="2" rx="2"/>
+          <rect x="778" y="60" width="24" height="14" fill="var(--ink-2)" opacity="0.5"/>
+
+          <!-- act markers -->
+          <g stroke="var(--line)" stroke-width="1">
+            <line x1="40" y1="60" x2="40" y2="140"/>
+            <line x1="370" y1="60" x2="370" y2="140"/>
+            <line x1="760" y1="60" x2="760" y2="140"/>
+          </g>
+
+          <g font-size="10" fill="var(--muted)">
+            <text x="40" y="152">X 0</text>
+            <text x="352" y="152">10 500</text>
+            <text x="736" y="152">22 000</text>
+            <text x="812" y="152" text-anchor="end">23 400</text>
+          </g>
+
+          <g class="t-act" font-size="13" fill="var(--ink)">
+            <text x="40" y="44">ATO I</text>
+            <text x="370" y="44">ATO II</text>
+            <text x="700" y="44">ATO III</text>
+          </g>
+          <g class="t-place" font-size="12" fill="var(--muted)">
+            <text x="86" y="44">A Estrada</text>
+            <text x="425" y="44">As Ruas</text>
+            <text x="755" y="44">A Igreja</text>
+          </g>
+
+          <!-- blend callout -->
+          <g>
+            <line x1="370" y1="126" x2="430" y2="126" stroke="var(--earth)" stroke-width="2"/>
+            <text x="400" y="176" text-anchor="middle" font-size="9.5" fill="var(--earth)">GROUND CROSS-FADE</text>
+            <line x1="400" y1="160" x2="400" y2="132" stroke="var(--earth)" stroke-width="1" opacity="0.6"/>
+          </g>
+          <g>
+            <text x="790" y="176" text-anchor="middle" font-size="9.5" fill="var(--alien)">BARRIER</text>
+            <line x1="790" y1="160" x2="790" y2="132" stroke="var(--alien)" stroke-width="1" opacity="0.6"/>
+          </g>
+        </svg>
+        <figcaption>
+          The whole game is one axis. Difficulty ramps mostly with distance and
+          only mildly with time — this is a journey with a destination, not a
+          survival timer. The small time term exists so that standing still is
+          not a safe strategy.
+        </figcaption>
+      </figure>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Act</th><th>World X</th><th>Place</th><th>Enemies</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>I — A Estrada</strong></td>
+              <td class="num">0 → 10 500</td>
+              <td>Caatinga, dirt road, mandacaru</td>
+              <td>Ends in <strong>A Manifestação</strong></td>
+            </tr>
+            <tr>
+              <td><strong>II — As Ruas</strong></td>
+              <td class="num">10 500 → 22 000</td>
+              <td>Asphalt, houses, street lamps</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>III — A Igreja</strong></td>
+              <td class="num">22 000 → 23 400</td>
+              <td>Praça, barrier closes, camera locks</td>
+              <td>Ends in <strong>O Noivo Cinzento</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The ground texture and the road surface are tied to those boundaries
+        rather than to numbers that once matched them. When the acts were
+        lengthened the biome blend stayed where it was, and Floriano’s
+        asphalt turned up three thousand units before Floriano did — the
+        Act I boss was being fought on a paved road in the middle of the
+        caatinga. The dirt becomes asphalt at X 10 300 and the ground
+        cross-fades over 9 700 → 10 900, both just shy of Act II.
+      </p>
+      <p>
+        One design beat worth knowing: <strong>the barrier closing heals you to
+        full.</strong> Otherwise act three is decided by how much health
+        survived the walk across town rather than by the fight itself.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>The bestiary, and how it arrives</h2></div>
+    <div class="stack stack-6">
+      <p>
+        Every species has a world X before which it does not exist. At the
+        start of the road the only thing in the game is one mutated cow, and
+        the caatinga introduces itself a piece at a time.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Species</th><th>Distance</th><th>Kills</th><th>Seen at</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Vaca Mutada</strong></td><td class="num">X 0</td><td class="num">0</td><td class="num">X 0.1k</td><td>The local cattle, corrupted. The first thing you ever meet.</td></tr>
+            <tr><td><strong>Vaca no Saquinho</strong></td><td class="num">X 700</td><td class="num">8</td><td class="num">X 3.3k</td><td>They bagged the cows. The bags float. Nobody has explained this.</td></tr>
+            <tr><td><strong>Coisa Voadora</strong></td><td class="num">X 1 600</td><td class="num">18</td><td class="num">X 6.2k</td><td>Breaks apart instead of dying quietly.</td></tr>
+            <tr><td><strong>Alien&iacute;gena</strong></td><td class="num">X 5 200</td><td class="num">30</td><td class="num">X 8.2k</td><td>The rank and file, in three colours. Drifts in over the back half of the road.</td></tr>
+            <tr><td><strong>Tripa Seca</strong></td><td class="num">X 10 500</td><td class="num">100</td><td class="num">X 12.9k</td><td>A thief. Only in town.</td></tr>
+            <tr><td><strong>Saleiro</strong></td><td class="num">X 10 800</td><td class="num">106</td><td class="num">X 14.1k</td><td>Salts the ground, and the salt is the weapon.</td></tr>
+            <tr><td><strong>Alien do Ovo</strong></td><td class="num">X 11 200</td><td class="num">112</td><td class="num">X 14.7k</td><td>Walks an egg over to you and lights the fuse.</td></tr>
+            <tr><td><strong>Grande Gordo</strong></td><td class="num">X 11 500</td><td class="num">120</td><td class="num">X 15.7k</td><td>190 HP. A sponge.</td></tr>
+            <tr><td><strong>Alien Foguete</strong></td><td class="num">X 11 800</td><td class="num">128</td><td class="num">X 15.9k</td><td>Scenery until you step inside its ring.</td></tr>
+            <tr><td><strong>Glowie</strong></td><td class="num">X 12 400</td><td class="num">136</td><td class="num">X 16.5k</td><td>Arrives in threes and lights the street up.</td></tr>
+            <tr><td><strong>Doido do Carro</strong></td><td class="num">X 10 500</td><td class="num">145</td><td class="num">X 17.9k</td><td>Rare. Not on anyone&rsquo;s side.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The fourth column is where each one <strong>actually turned up</strong>
+        in an instrumented run, and it is the number that matters. The quotas
+        have to be read against the real kill curve, which is far flatter than
+        it looks like it should be: a run reaches Floriano at about
+        <strong>96 kills</strong> and leaves it at about <strong>180</strong>
+        &mdash; you walk past far more than you shoot. An earlier set of quotas
+        in the 175&ndash;260 range had been written for a shorter game, and the
+        effect was that almost the whole Floriano roster never unlocked before
+        the church. The town was three species and a rumour.
+      </p>
+      <p>
+        A species needs <strong>both</strong> gates. Distance is the coarse one,
+        keeping town enemies out of the caatinga; the kill quota is the cadence
+        &mdash; clear a quota of what is in front of you and the road answers
+        with something new. Walking further does not skip the bestiary, and
+        standing still and farming does not either.
+      </p>
+      <p>
+        The opening ramps its headcount too &mdash; about five bodies at X 179,
+        rising to full pressure by X 1 300. &ldquo;The first enemy is a cow&rdquo;
+        only reads if there is actually one of them; at full density the opening
+        is a wall of cattle walking into you before the revolver has a single
+        upgrade.
+      </p>
+
+      <h3 style="margin-top:8px">Two ways they arrive</h3>
+      <div class="cols">
+        <div class="col">
+          <h3>The trickle</h3>
+          <p>
+            Steady pressure, and <strong>94% of it arrives through a cone
+            centred on where he is looking</strong> &mdash; measured: point
+            west, 94% spawn west. The way he faces is the way he is about to
+            push, so pointing at something also means walking into more of it.
+            The remaining sixth wanders in from anywhere, so turning around is
+            never a way to empty the world.
+          </p>
+        </div>
+        <div class="col">
+          <h3>The waves</h3>
+          <p>
+            Every 42 seconds a large group drops in a <strong>full ring</strong>
+            all around, just outside the view &mdash; measured at E6/N7/W8/S7,
+            evenly on every side. <strong>Thirty-two for the first, ten more
+            each time after, up to 110.</strong> A wave is meant to be a wall;
+            if it is not obviously different from the trickle, the punctuation
+            is lost.
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">The four reworked species</h3>
+      <div class="stack stack-4">
+        <div class="finding">
+          <p><strong>Coisa Voadora cannot be one-shot.</strong> Whatever lands
+          on it first &mdash; a bullet, a fish, a bomb dropped on its head
+          &mdash; only breaks it, and it survives. Verified with a single
+          999&nbsp;999-damage hit: it still just breaks. After that it is
+          ordinary and dies to one more base revolver shot, so it reads as a
+          clean two-hit enemy: break it, then kill it.</p>
+          <p>What happens in between is the point. The broken form arcs with
+          energy and vents five bullets in every direction every 2.3 seconds, so
+          the thing you just failed to delete is now the thing shooting at you.
+          <code>broken</code> is an explicit state on the enemy, not a health
+          threshold, and the absorb lives in <code>damageEnemy</code> so every
+          damage source in the game goes through the same rule.</p>
+          <p class="fix">The vent is deliberately sparse. Because they always
+          survive to break there is a standing population of them venting at
+          once; at six bullets every 1.5 seconds the second half of the road
+          turned into a bullet screen and runs reaching the arena fell from 7
+          in 10 to 4 in 10.</p>
+        </div>
+        <div class="finding">
+          <p><strong>Tripa Seca is a criminal they abducted and drove.</strong>
+          He shoots on the approach but never backs off; what he wants is to
+          reach you and take <strong>one stack of a random ability</strong>.</p>
+          <p>One stack rather than the whole thing &mdash; losing a maxed
+          Tambaqui to a single touch would be miserable, while one stack is a
+          real loss you can see on the HUD and earn back. The RNG de RPG shield
+          blocks the robbery too. He is made of paper: two shots put him down,
+          and that is the entire answer to him.</p>
+        </div>
+        <div class="finding">
+          <p><strong>Vaca no Saquinho drifts instead of walking</strong> &mdash;
+          it hovers, and its shadow stays on the ground underneath.
+          <strong>Alien&iacute;gena</strong> is one enemy with three drawn colour
+          sheets picked at spawn, so a street full of them is not a street of
+          identical sprites.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">The Floriano five</h3>
+      <p>
+        The town&rsquo;s roster is built so that each one asks a different
+        question of <em>where you are standing</em>, rather than being another
+        thing that walks at you.
+      </p>
+      <div class="cols">
+        <div class="col">
+          <h3>Saleiro</h3>
+          <p>
+            Floats around salting the floor, and the salt is the weapon. It is
+            an <strong>aura</strong> &mdash; damage you are standing in rather
+            than damage aimed at you, so it ignores attack cooldowns entirely.
+            Not something to walk past; something to leave. Measured at 14 HP
+            over a second and a half inside the radius.
+          </p>
+        </div>
+        <div class="col">
+          <h3>Alien do Ovo</h3>
+          <p>
+            Carries an egg toward you at a walking pace, then lights the fuse.
+            Slow on purpose: the counterplay is noticing. Worth knowing &mdash;
+            <strong>the revolver&rsquo;s knockback holds it at arm&rsquo;s
+            length</strong>, so shooting it is itself a way of never letting it
+            arrive. Silence the gun and it closes and takes 21 HP off you.
+          </p>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h3>Alien Foguete</h3>
+          <p>
+            Scenery until you cross its detection ring at 300 units, then it is
+            a missile &mdash; and the sprite changes so you can tell which one
+            you are looking at. Verified asleep at 500 units, awake and
+            detonating for 20 shortly after.
+          </p>
+        </div>
+        <div class="col">
+          <h3>Glowie</h3>
+          <p>
+            Arrives in <strong>groups of three</strong> and shoots green,
+            glowing rounds &mdash; the shot carries the glow with it, an
+            additive bloom under the tracer, so a cluster lights the street
+            rather than reading as the same lilac pellet everything else throws.
+            Standing near one costs you continuously, so three of them is a
+            no-go area rather than three separate problems.
+          </p>
+        </div>
+      </div>
+      <p>
+        <strong>Doido do Carro</strong> is a Floriano folk doing ninety down the
+        street. It does not chase and does not steer: it picks a lane and
+        commits, it only exists on the asphalt, and <strong>it is not on
+        anyone&rsquo;s side</strong> &mdash; measured ploughing 10 of 10 aliens
+        in its path while keeping 821 of its 900 HP. Rare, and the joke does not
+        work if you can shoot it before it arrives.
+      </p>
+
+      <h3 style="margin-top:8px">A MANIFESTA&Ccedil;&Atilde;O &mdash; the wall between the road and Floriano</h3>
+      <p>
+        Act I ends in a riot of mind-controlled people, and it is the one fight
+        in the game that is about <strong>moving</strong> rather than about
+        aiming.
+      </p>
+      <p>
+        <strong>The field is swept when it arrives.</strong> Nothing survives
+        into the arena &mdash; the barrier closes on an empty road and the only
+        things inside are the riot and what the riot makes. That is a property
+        of the arena, not a global rule: the church square is deliberately
+        <em>not</em> sealed, because at a wedding the guests turning up is the
+        point. Without it the trickle kept walking in along the barrier and
+        fifty cattle wandered through the flags.
+      </p>
+      <p>
+        It does not chase. It drifts, and fills the air with <strong>flags</strong>
+        on two clocks &mdash; a spiral that sweeps the arena and, from phase two,
+        a full ring volley &mdash; while throwing bodies into the fight. Both
+        escalate across three phases keyed to its health bar, which means
+        <strong>hurting it is also what makes it dangerous</strong>.
+      </p>
+      <div class="cols">
+        <div class="col">
+          <h3>The minions are capped at six</h3>
+          <p>
+            The gun aims itself, and a body at arm&rsquo;s length always
+            outscores a boss across the arena. Uncapped, the fight quietly
+            became &ldquo;shoot manifestantes forever&rdquo; while the health
+            bar stopped moving.
+          </p>
+        </div>
+        <div class="col">
+          <h3>1 700 HP, by measurement</h3>
+          <p>
+            A run arrives around level five with the revolver between 1.2&times;
+            and 1.8&times; damage. At that build this is a <strong>34-second
+            fight that takes the player to about half health</strong>, and a bot
+            that kites and dodges clears it 7 times in 12. Below 1 300 it
+            collapses to twenty seconds and barely scratches anyone.
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">He talks about it</h3>
+      <p>
+        The first time O Ind&iacute;gena sees a species he says something in a
+        bubble over his head &mdash; <em>&ldquo;Botaram a vaca no
+        saquinho?!&rdquo;</em>, <em>&ldquo;Esse a&iacute; era gente. E quer o
+        que &eacute; meu.&rdquo;</em> Waves get their own lines, and so does
+        being robbed. Lines are queued rather than interrupted, because three
+        species can show up in the same second during a wave and a bark replaced
+        mid-word reads as a glitch. They live on the enemy definitions, one
+        field per species, so writing more dialogue never touches a system.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>The build, and what it costs</h2></div>
+    <div class="stack stack-6">
+      <h3>Six powers, and the swap</h3>
+      <p>
+        <strong>The power bar caps at six, and a full bar is not a closed
+        door.</strong> New powers keep being offered once the six are spent, and
+        taking one asks what it replaces. Declining is always allowed and returns
+        you to the other two cards &mdash; the player picked the card before they
+        knew what it would cost, and a prompt you cannot back out of is a trap
+        rather than a choice.
+      </p>
+      <p>
+        Whatever is dropped is dropped <strong>entirely</strong>, every stack of
+        it. Half a Tornado is not a thing anyone wants to be left holding, and
+        the slot has to actually come free. Stats stay hard-capped: they are
+        small numeric bumps, and a swap prompt for +7% speed is friction with no
+        decision in it.
+      </p>
+
+      <h3>The slots</h3>
+      <p>
+        A run used to simply accumulate. By level fifteen the player had most of
+        the deck, every card was a yes, and a level-up only asked which thing
+        you wanted <em>first</em> &mdash; never what you wanted at all.
+      </p>
+      <p>
+        The build is capped now: <strong>four powers and four stats</strong>, and
+        that is all. Ammo sits outside the cap (only one is loaded at a time,
+        cycled with E) and so do the one-offs &mdash; P&atilde;o de Alho is
+        eaten and Reviva is spent by dying, so neither occupies a slot you have
+        to live with. Cards you already own keep being offered once you are
+        full: <strong>a capped build can still deepen, it just cannot
+        widen</strong>. The level-up screen says which is which, and says
+        <em>&Uacute;LTIMA VAGA</em> in red when a card would take your last one.
+      </p>
+
+      <h3>Sorte</h3>
+      <p>
+        Luck is not a stat that does one thing. It is the input to
+        <strong>every roll the game makes on the player's behalf</strong>, and
+        all four live in one file so that &ldquo;what is luck worth?&rdquo; has
+        one answer to read rather than six scattered constants.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Roll</th><th>Luck 0</th><th>Luck 3</th><th>Luck 8</th></tr></thead>
+          <tbody>
+            <tr><td>Crit chance (2&times; damage)</td><td class="num">4%</td><td class="num">21%</td><td class="num">32%</td></tr>
+            <tr><td>A card is <strong>lend&aacute;rio</strong></td><td class="num">2%</td><td class="num">4.5%</td><td class="num">5.9%</td></tr>
+            <tr><td>A card is <strong>comum</strong></td><td class="num">62%</td><td class="num">44%</td><td class="num">34%</td></tr>
+            <tr><td>A corpse drops something</td><td class="num">&times;1</td><td class="num">&times;1.9</td><td class="num">&times;2.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Every curve saturates, so luck is worth taking at 1 and still worth
+        taking at 6 without a stacked-luck run rolling legendaries every level.
+        The spread is the design: a luck card that only improved level-up offers
+        would be a stat about menus, and one that only gave crits would be a
+        worse damage card. Touching all four makes it the card that makes the
+        whole run go better.
+      </p>
+      <p>
+        <strong>Crits are also where the damage scaling went.</strong> Melhorar a
+        Arma used to be +22%, eight times over &mdash; 4.9&times; damage out of
+        one card, which outran every enemy in the game and turned the back half
+        of a run into a formality. It is +12% and six deep now. The difference
+        moved into a number you <em>roll</em> rather than a number you own.
+      </p>
+
+      <h3>Rarity, and why the deck can now grow</h3>
+      <p>
+        Cards used to be drawn on a single flat weight across the whole deck,
+        which had a standing problem: every card added made the two carrying the
+        build harder to find, and their weights had been raised three times to
+        compensate. Now <strong>a tier is rolled first &mdash; luck bends that
+        roll &mdash; and then a card is picked inside that tier</strong>.
+        Melhorar a Arma competes with six other commons instead of with
+        twenty-eight cards, so the deck can keep growing without diluting
+        anything.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Tier</th><th>Odds at luck 0</th><th>What lives there</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Comum</strong></td><td class="num">62%</td><td>The spine: damage, cadence, health, <strong>armour</strong>, speed, magnet, bread</td></tr>
+            <tr><td><strong>Incomum</strong></td><td class="num">26%</td><td>Sorte, vampirism, piercing, bombs, brick, fish, two ammo</td></tr>
+            <tr><td><strong>Raro</strong></td><td class="num">10%</td><td>Multishot, criptografia, the orbital ring, most abilities, three ammo</td></tr>
+            <tr><td><strong>Lend&aacute;rio</strong></td><td class="num">2%</td><td>Amuleto, Escudo Alien, Reviva</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <strong>Armour is deliberately common.</strong> Contact damage was
+        doubled, and a run that is offered nothing but damage cards while being
+        killed by touches is not a difficulty curve &mdash; it is a missing
+        answer.
+      </p>
+
+      <h3>The gamble</h3>
+      <p>
+        <strong>RNG de RPG is no longer a coin flip for a shield.</strong>
+        Heads-you-win, tails-you-get-nothing is the least interesting thing a
+        gamble can do, so the card now rolls a table of fourteen outcomes on its
+        own clock &mdash; and five of them are bad. It is the only thing in the
+        build that can hurt you.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th></th><th>What is in the table</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Prizes</strong></td><td>A shield; a fire-rate, damage or speed buff; a heal; a vanish; an Escudo Alien charge; a shower of XP</td></tr>
+            <tr><td><strong>Punishments</strong></td><td>The revolver jams; your legs go; your eyes go; <strong>it goes off in your hand</strong> &mdash; a blast centred on your own feet that catches the crowd too; or it whistles up seven more of them</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Three rules keep it from being miserable, and they are worth preserving:</p>
+      <ol>
+        <li><strong>Nothing here can kill you.</strong> The self-damage is a
+          fraction of <em>current</em> health and never the last of it &mdash;
+          dying to your own upgrade with a boss watching is a bug report, not a
+          story.</li>
+        <li><strong>Bad outcomes are loud and short.</strong> You always know
+          what happened, and it is over in seconds. They are named on the HUD
+          while they run.</li>
+        <li><strong>Luck buys you out of them, but never all the way.</strong>
+          About a third of the table is bad at zero sorte and about an eighth at
+          high sorte. An earlier curve took it to 3%, which is not a lucky
+          gambler &mdash; it is a gambler who has stopped gambling.</li>
+      </ol>
+      <p>
+        That coupling is the point: the gamble card and the luck cards are worth
+        more together than apart, which is why both exist. <strong>Escudo
+        Fiel</strong> is the other half of the answer &mdash; a shorter, weaker
+        shield that is absolutely certain, so a player who wants protection can
+        buy it instead of gambling for it.
+      </p>
+
+      <h3>The new cards</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Card</th><th>Slot</th><th>Tier</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Colete de Couro</strong></td><td>stat</td><td>comum</td><td>Flat damage off every blow. Flat, not a percentage: armour should make a graze survivable, not make small enemies stop existing</td></tr>
+            <tr><td><strong>Sorte de Cabra</strong></td><td>stat</td><td>incomum</td><td>+1 sorte</td></tr>
+            <tr><td><strong>Amuleto do Juazeiro</strong></td><td>stat</td><td>lend&aacute;rio</td><td>+2 sorte</td></tr>
+            <tr><td><strong>Criptografia</strong></td><td>stat</td><td>raro</td><td>They notice you later &mdash; and the shooters hold fire longer</td></tr>
+            <tr><td><strong>Rebimboca Orbital</strong></td><td>power</td><td>raro</td><td>Rounds that never leave, circling him. The only thing in the build that defends where he is <em>standing</em> rather than where he is <em>pointing</em></td></tr>
+            <tr><td><strong>Raio de Tup&atilde;</strong></td><td>power</td><td>lend&aacute;rio</td><td>The sky picks the <strong>biggest health bar in range</strong> &mdash; elites count double &mdash; and deletes it. The one piece that answers a Grande Gordo wading toward you. It telegraphs before it lands, because a bolt that simply appears reads as a bug</td></tr>
+            <tr><td><strong>Escudo Alien</strong></td><td>power</td><td>lend&aacute;rio</td><td>Charges, not seconds. A charge sits there until something actually hits you, then eats that blow whole</td></tr>
+            <tr><td><strong>Olho de Gavi&atilde;o</strong></td><td>stat</td><td>comum</td><td>+18% revolver reach &mdash; both what it locks onto and how far the bullet flies</td></tr>
+            <tr><td><strong>Dash Emp&iacute;rico</strong></td><td>power</td><td>incomum</td><td><strong>Space.</strong> The i-frames are the ability, not the distance: the only answer in the build to a pattern that has already closed around you</td></tr>
+            <tr><td><strong>Escudo Fiel</strong></td><td>power</td><td>incomum</td><td>A short shield, always on time. No dice</td></tr>
+            <tr><td><strong>Cogumelo</strong></td><td>power</td><td>incomum</td><td>Dropped at his feet as he walks. Burns the ground for three seconds, then explodes. The one power that rewards <em>retreating</em></td></tr>
+            <tr><td><strong>Dan&ccedil;a da Chuva</strong></td><td>power</td><td>raro</td><td>He dances, and the sky answers a few seconds later &mdash; <strong>where he was</strong>. A bet on where the fight is about to be, not a panic button</td></tr>
+            <tr><td><strong>Tornado</strong></td><td>power</td><td>raro</td><td>Thrown along the aim, pierces everything, shoves what it touches. A moving wall rather than a bullet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout">
+        <strong>Bombas do Louro are aimed now.</strong> They used to pick any
+        body in the pool at random and land within thirty-five units of it,
+        which on a full screen sent most of a volley somewhere the player was
+        not fighting. Each bomb now takes the nearest target it can and never
+        the same body twice in one volley, and lands much closer to it. The
+        blast radius is unchanged &mdash; this is accuracy, not power.
+      </p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><h2>How it is built</h2></div>
+    <div class="stack stack-6">
+      <p>
+        <strong>React never renders the game.</strong> It mounts a
+        <code>&lt;canvas&gt;</code>, hands it to the engine, and subscribes to a
+        small snapshot object pushed about fifteen times a second for the HUD.
+        Reconciling 700 enemies through the virtual DOM sixty times a second is
+        not a thing that works.
+      </p>
+
+      <div class="cols">
+        <div class="col">
+          <h3>Fixed timestep</h3>
+          <p>
+            The simulation always advances in exact 1/60 slices no matter what
+            the display does, so behaviour is identical on a 60 Hz laptop and a
+            144 Hz monitor, and an alt-tabbed tab cannot teleport anything
+            through a wall.
+          </p>
+        </div>
+        <div class="col">
+          <h3>Chunks are baked</h3>
+          <p>
+            Each 600×600 patch of world is painted once into its own canvas —
+            ground, road, scenery — and the frame just blits a handful. Generation
+            is seeded from world coordinates, so a chunk returns byte-identical
+            after being evicted from the cache.
+          </p>
+        </div>
+        <div class="col">
+          <h3>The mouse steers, it does not fire</h3>
+          <p>
+            Targets are scored by distance, then bent two ways: elites get their
+            distance weighted down, and everything is weighted by how far off the
+            cursor's direction it sits. You never click — pointing just decides
+            which side of the horde gets cleared, and O Indígena turns to face it.
+          </p>
+        </div>
+        <div class="col">
+          <h3>Dense pools, spatial hash</h3>
+          <p>
+            Enemies live in a packed array with swap-remove, so the hot loops
+            are contiguous and nothing allocates per frame. A uniform grid turns
+            400 bullets against 700 enemies from 280 000 distance checks per
+            tick into a few dozen.
+          </p>
+        </div>
+      </div>
+
+<pre>src/
+  App.tsx          React shell: canvas + overlays
+  ui/              HUD, menus, level-up cards, 9-slice panel
+  game/
+    Game.ts        the loop, the pools, the run state
+    config.ts      EVERY tunable number lives here
+    core/          assets, camera, input, pool, spatial hash, rng
+    world/         road.ts, chunks.ts, biomes.ts
+    systems/       ai, combat, spawner, progression, render
+    data/          sprites, enemies, weapons, stages  &lt;- you edit these</pre>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><h2>Getting your art in</h2></div>
+    <div class="stack stack-6">
+      <p>
+        Drop the PNG in <code>public/sprites/</code>, add one line to
+        <code>data/sprites.ts</code>, point an enemy at it in
+        <code>data/enemies.ts</code>. That is the whole pipeline.
+      </p>
+      <p>
+        <strong>Frames do not have to be on a grid.</strong> The loader measures
+        the art, finds the gaps between poses, re-packs them into an even strip
+        and puts the feet on the bottom row. Any enemy without art yet renders
+        as a coloured blob, so a monster can be designed and balanced before it
+        is drawn. Every sheet prints its detected frame boxes to the dev console
+        on load — that table is the first place to look if a pose looks clipped.
+      </p>
+
+      <h3 style="margin-top:8px">What the current art needs</h3>
+      <p style="color:var(--muted); font-size:16.5px">
+        Findings from measuring the files. None are blocking — the code works
+        around all of them — but each fix removes a workaround.
+      </p>
+
+      <div class="stack stack-4">
+        <div class="finding">
+          <p><strong>The player sheets have three poses, not two.</strong>
+          <code>Andando.png</code>, <code>holding_gun_walking.png</code> and
+          <code>holding_gun_walking_shooting.png</code> are each 64×32 holding
+          three poses, hand-placed at pitches of <strong>15, 17 and 19 px</strong>
+          — three different spacings inside files of the same size. Slicing those
+          on a uniform 64/3 grid chops arms off, so the loader auto-detects instead.</p>
+          <p class="fix">If you re-export: three frames of 32×32 in a 96×32 file removes the guesswork.</p>
+        </div>
+
+        <div class="finding">
+          <p><strong><code>base_texture_lvl_base.png</code> does not tile.</strong>
+          Its right edge does not continue into its own left edge, which showed
+          up in game as a hard 100-unit lattice across the entire map. It is now
+          repaired at load time by blending in a half-offset copy near the edges,
+          which costs a little contrast there.
+          (<code>base_texture_lvl_floriano.png</code> is very close to seamless already.)</p>
+          <p class="fix">A properly tileable version looks better and lets that code be deleted.</p>
+        </div>
+
+        <div class="finding">
+          <p><strong>Road tiles chain by their edges.</strong> Each piece enters
+          at one height and leaves at another. The generator places every tile
+          exactly where the previous one's band ended and picks between a piece
+          and its mirrored twin to steer toward a lazy target line — which is why
+          the road meanders with no seams.</p>
+          <div class="scroller" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Tile</th><th>Enters at y</th><th>Leaves at y</th><th>Effect</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">dirt_road_1</td><td class="num">~55</td><td class="num">~50</td><td>climbs 5 px</td></tr>
+                <tr><td class="mono">dirt_road_3</td><td class="num">~54</td><td class="num">~68</td><td>drops 14 px</td></tr>
+                <tr><td class="mono">floriano_road_1</td><td class="num">~51</td><td class="num">~50</td><td>flat</td></tr>
+                <tr><td class="mono">dirt_road_2</td><td class="num">—</td><td class="num">—</td><td><strong>transparent on both edges — cannot chain, unused</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="fix" style="margin-top:12px"><code>dirt_road_2</code> becomes usable the moment its band touches both side edges. New pieces just need their measured entry/exit added to the tables in <code>world/road.ts</code>.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:8px">Ammo, and abilities</h3>
+      <p>
+        Two different things, and the difference matters. <strong>Ammo</strong>
+        is what the revolver is loaded with &mdash; one type at a time,
+        collected as a card, cycled with <strong>E</strong> mid-fight. Every
+        stat card improves whatever is loaded, so a damage upgrade never
+        favours one type.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Loaded</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Rev&oacute;lver</strong></td><td>The default. Everything else is measured against it.</td></tr>
+            <tr><td><strong>Balas Venenosas</strong></td><td>Less than half a normal round's damage, but each hit adds a stack of poison &mdash; and <strong>any</strong> bullet landing on that target refreshes the whole stack. Put stacks into something big, switch back to the revolver, and the venom keeps ticking as long as you keep the pressure on. Stop shooting it and it falls off.</td></tr>
+            <tr><td><strong>Chumbo Grosso</strong></td><td>Five pellets in a wide fan. Enormous in a press, and its 150-unit range makes it the wrong thing to have loaded when the boss is across the square.</td></tr>
+            <tr><td><strong>Bala Perfurante</strong></td><td>Goes through five bodies and keeps going. Weak per body, long range &mdash; for the column walking at you from the east.</td></tr>
+            <tr><td><strong>Bala Explosiva</strong></td><td>Slow, mediocre against one thing, and the damage is in the burst. It cannot hurt you: a self-damaging round on a weapon that fires itself is a trap nobody asked for.</td></tr>
+            <tr><td><strong>Bala Ricochete</strong></td><td>Jumps to a fresh body twice on the way. Never wasted in a loose crowd, nearly nothing against a lone target.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Five of the six drawn types carry mechanics.
+        <code>bullet_around</code> is registered with its art and no card.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Kill rate vs. the plain revolver</th><th>Act I</th><th>Act II</th></tr></thead>
+          <tbody>
+            <tr><td>Balas Venenosas</td><td class="num">&minus;4%</td><td class="num">+26%</td></tr>
+            <tr><td>Chumbo Grosso</td><td class="num">+28%</td><td class="num">&minus;3%</td></tr>
+            <tr><td>Bala Perfurante</td><td class="num">+37%</td><td class="num">+47%</td></tr>
+            <tr><td>Bala Explosiva</td><td class="num">+16%</td><td class="num">+34%</td></tr>
+            <tr><td>Bala Ricochete</td><td class="num">+43%</td><td class="num">+24%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Ten runs averaged per cell. Every type is best somewhere and weak
+        somewhere, and nothing dominates: venom is wasted on Act I bodies that
+        die to one shot and comes into its own against tougher ones; the spread
+        wants a press and the piercing round wants a column; ricochet lives on
+        loose crowds and explosive on packed ones.
+      </p>
+      <p>
+        Earlier tunings had explosive at <strong>+148%</strong> and ricochet at
+        <strong>+93%</strong> &mdash; both hit everything in a crowd, and a
+        crowd is the default situation. Cutting ricochet's damage and a bounce
+        at the same time then overshot it to &minus;8%, which is the shape of
+        every balance pass here: one lever at a time, measured, or the result is
+        noise.
+      </p>
+
+      <h3 style="margin-top:8px">The abilities</h3>
+      <p>
+        Seven cards run on their own clocks instead of multiplying a stat.
+        Their numbers live in <code>data/abilities.ts</code> as per-stack
+        tables, so re-balancing is editing a row rather than hunting through
+        the systems.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Card</th><th>What it does</th><th>Stacking</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Balas Venenosas</strong></td><td>Each shot may poison the target for chip damage</td><td>Better odds <em>and</em> more damage</td></tr>
+            <tr><td><strong>Bombas do Louro</strong></td><td>Lobs a bomb into the crowd on a timer</td><td>Shorter cooldown, more damage — <strong>never a bigger radius</strong></td></tr>
+            <tr><td><strong>RNG de RPG</strong></td><td>Every 30s, a 50% roll for a 1-second shield</td><td>Improves the roll, not the shield</td></tr>
+            <tr><td><strong>Privacidade</strong></td><td>Every 25s he vanishes and the horde loses him</td><td>Longer vanish</td></tr>
+            <tr><td><strong>Tijolo de Leite</strong></td><td>The brick is hard — whoever hits him takes chip damage</td><td>Harder brick</td></tr>
+            <tr><td><strong>Tambaqui</strong></td><td>Throws a handful of fish at the nearest bodies, piercing</td><td>Two at once, up to six</td></tr>
+            <tr><td><strong>Hom&uacute;nculo</strong></td><td>A familiar that <strong>stands between you and the nearest threat</strong>. It pulls aggro, and whatever hits it takes damage back</td><td>One more helper per card</td></tr>
+            <tr><td><strong>Teleporte Indígena</strong></td><td>Double-tap <strong>Q</strong> to jump toward the cursor</td><td>Further, shorter cooldown</td></tr>
+            <tr><td><strong>Reviva</strong></td><td>Get back up once at half health</td><td>Rare, and never offered while one is banked</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="finding">
+        <p><strong>Ability damage scales with your damage stat.</strong> Card
+        upgrades compound (1.22<sup>n</sup>) while a flat ability does not, so
+        without this the abilities quietly become traps — a bomb worth 130 is
+        strong at level 3 and irrelevant at level 15. Tying them to the same
+        gunpowder means Melhorar a Arma improves your bombs and your fish too,
+        so picking one is about what you want rather than about which card is
+        not a mistake.</p>
+        <p><strong>The bomb is thrown at a random body, not a random point.</strong>
+        A uniformly random spot around the player lands in empty caatinga most
+        of the time; measured, that version was worth 8% more kills, which is
+        not worth a card.</p>
+        <p><strong>Privacidade freezes the horde's last sighting</strong> rather
+        than switching their AI off. They keep coming, confidently, to the wrong
+        place, and you walk out the side.</p>
+      </div>
+
+      <div class="finding">
+        <p><strong>The hom&uacute;nculo changes where the crowd walks</strong>,
+        not just how much it hurts. Anything within 150 units of one goes for it
+        instead of you &mdash; measured, a group that would have closed on the
+        player parks on the hom&uacute;nculo instead.</p>
+        <p>They <strong>interpose</strong>: they hold station between the player
+        and whatever is closest, and swap sides when the threat does (verified
+        &mdash; threat east puts them at +28 to +40, threat west at &minus;31 to
+        &minus;40). Trailing behind, which is how they started, looked like an
+        escort and did nothing; the crowd simply walked past them.</p>
+        <p>Each is made of nothing and dies fast, but every hit costs the
+        attacker, so losing one in a press is a trade rather than a loss. Three
+        of them are worth about 40% more kills.</p>
+      </div>
+
+      <div class="finding">
+        <p><strong>The Totem do Hom&uacute;nculo is not a card.</strong> It is an
+        object lying in the world, rolled once per chunk column from the world
+        seed and placed 100&ndash;260 units off the road &mdash; close enough to
+        spot while travelling, far enough that you have to go and get it.</p>
+        <p>Across twelve seeds it averages <strong>0.9 per run</strong>, and some
+        runs have none at all. Walking onto one grants a permanent helper slot
+        and summons one on the spot. It is drawn with a glow, because a rare
+        thing nobody notices is not a rare thing.</p>
+        <p class="fix">Rolled per column, not per chunk: the road only ever
+        occupies one chunk row, so rolling in two dimensions and then placing
+        relative to the road meant every totem that came up in a row above or
+        below could never be placed, and none ever spawned.</p>
+      </div>
+
+      <div class="finding">
+        <p><strong>Hits read properly now.</strong> Every sprite gets a white
+        silhouette punched over it on impact, pre-rendered at load rather than
+        composited per hit, plus a brief swell and four sparks. Brightening a
+        sprite additively barely showed on art this dark &mdash; these enemies
+        are browns and deep greens, and a hit registered as a faint shimmer.</p>
+        <p><strong>Enemies roll &plusmn;12% health.</strong> Not a difficulty
+        knob: identical health makes a crowd read as one object being deleted a
+        slice at a time. Elites and the boss stay exact.</p>
+        <p><strong>RNG de RPG was buffed</strong> &mdash; the roll comes every 20
+        seconds instead of 30, from 55% up to 92% with cards, and the shield
+        lasts 1.4&ndash;2.6 seconds instead of a flat 1.</p>
+      </div>
+
+      <h3 style="margin-top:8px">Are they worth taking?</h3>
+      <p>
+        Five cards spent on one thing, measured as kills over forty seconds
+        against the same enemy pressure, versus spending nothing. Eight runs
+        averaged per cell — single runs on this are worthless, identical setups
+        range from 75 to 146 kills.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Five cards spent on</th><th>Act I</th><th>Act II</th></tr></thead>
+          <tbody>
+            <tr><td>Fúria Tapajó (fire rate)</td><td class="num">+102%</td><td class="num">+158%</td></tr>
+            <tr><td>Tambaqui</td><td class="num">+98%</td><td class="num">+180%</td></tr>
+            <tr><td>Melhorar a Arma (damage)</td><td class="num">+35%</td><td class="num">+185%</td></tr>
+            <tr><td>Balas Venenosas</td><td class="num">+50%</td><td class="num">+86%</td></tr>
+            <tr><td>Bombas do Louro</td><td class="num">+45%</td><td class="num">+89%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Nothing is a trap and nothing dominates. Raw stats pull ahead in Act II,
+        where enemies have the health to make compounding matter; the abilities
+        carry Act I, where most things die to one bullet anyway and extra
+        sources of damage beat a bigger bullet. Tijolo de Leite is missing
+        because it only fires when something hits you, and the harness turns
+        damage off to isolate output.
+      </p>
+
+      <div class="finding">
+        <p><strong>Still unassigned:</strong> <code>criptografia</code>,
+        <code>homonculi_totem</code>, <code>colete_gcm</code>,
+        <code>bomb_food</code>, <code>escudo_alienigena</code> and
+        <code>rebimboca</code> are drawn but have no card.
+        <code>homunculo_helper</code> is a walking ally sheet with no summon to
+        bring him out — he pairs obviously with the totem, and wants a mechanic.</p>
+      </div>
+
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px">Art still needed, in order of impact</div>
+        <ol class="ranked">
+          <li><strong>The four remaining enemies</strong> — Vaqueiro, Corredor, Atirador and Pretoriano are still blobs; six species are in.</li>
+          <li><strong>O Noivo Cinzento</strong> — the boss, currently a big purple blob.</li>
+          <li><strong>Soul</strong> — he is the entire premise and does not appear anywhere yet.</li>
+          <li><strong>Church and praça tiles</strong> — currently flat rectangles.</li>
+          <li><strong>Caatinga scenery</strong> — mandacaru, rocks, fences.</li>
+          <li><strong>City scenery</strong> — houses, lamp posts, benches.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><h2>What comes next</h2></div>
+    <div class="cols" style="margin-top:22px">
+      <div class="col">
+        <h3>Makes it feel like a game</h3>
+        <ul class="plain">
+          <li>Enemy sprites replacing the blobs</li>
+
+          <li>Sound: gunshot, hit, level-up, death, one track per act</li>
+          <li>Soul on screen — caged in the praça, freed on victory</li>
+          <li>Hit particles and death puffs</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>Makes a run worth repeating</h3>
+        <ul class="plain">
+          <li>Two or three more upgrade paths, so builds diverge</li>
+          <li>Elite spawns and a mid-act miniboss</li>
+          <li>Score screen with a personal best</li>
+          <li>A reward for clearing a wave</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>Later</h3>
+        <ul class="plain">
+          <li>Tall props that sort against the player instead of sitting flat underneath</li>
+          <li>Frame interpolation for 144 Hz displays</li>
+          <li>Gamepad support</li>
+          <li>A second playable character</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:26px; color:var(--muted); font-size:16.5px">
+      Deliberately out of scope for now: multiplayer, meta-progression between
+      runs, procedural acts beyond the current three, mobile app packaging.
+    </p>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">08</span><h2>Running it</h2></div>
+    <div class="stack stack-6">
+      <p>
+        <code>npm install</code>, then <code>npm run dev</code>. Deploy by
+        pushing to a Git repo and importing it on Vercel — detected as a Vite
+        project, no configuration, fully static output.
+      </p>
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px">Dev shortcuts</div>
+        <ul class="plain">
+          <li><code>?start=15000</code> — begin a run at that world X. Work on Act III without replaying Acts I and II.</li>
+          <li><code>soul</code> in the console — the live game instance.</li>
+          <li><code>soul.debugAdvance(120)</code> — run two minutes of simulation instantly. This is how every number in section 01 was measured.</li>
+        </ul>
+      </div>
+      <p style="color:var(--muted); font-size:16.5px">
+        Controls: WASD or arrows to walk. The revolver fires on its own — you
+        never click — but the mouse steers which way it looks. Double-tap Q to
+        teleport and SPACE to dash, once you have the cards. The mouse AIMS the
+        revolver &mdash; it fires by itself, but only where you point it. ESC pauses. On a phone, drag
+        anywhere; with no pointer he falls back to nearest-target.
+      </p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">09</span><h2>Open decisions</h2></div>
+    <div class="stack stack-4">
+      <div class="decision">
+        <div class="q">How hard should the cursor pull?</div>
+        <p>
+          <code>AIM_STEER</code> in <code>config.ts</code> sets how strongly
+          pointing overrides "nearest". At 4, something directly behind you has
+          to be roughly 2× closer to win the target — raise it for tighter
+          control, drop it toward 0 for pure nearest-target.
+          <code>AIM_MODE: 'mouse'</code> is also there if you ever want it
+          firing exactly at the cursor instead.
+        </p>
+      </div>
+      <div class="decision">
+        <div class="q">A repeatable run, or a one-off story?</div>
+        <p>
+          Right now it is a fixed four-minute journey with an ending. A
+          Vampire-Survivors-like usually wants meta-progression between runs; a
+          story game does not. This decides whether the roadmap's second column
+          is worth building.
+        </p>
+      </div>
+      <div class="decision">
+        <div class="q">How hard should the two bosses be?</div>
+        <p>
+          As tuned, a competent bot wins about half its runs against O Noivo and
+          7 in 12 against A Manifesta&ccedil;&atilde;o. Boss HP, arena size, the
+          minion cap and the heal-on-entry are separate dials if either should
+          be a wall instead.
+        </p>
+      </div>
+      <div class="decision">
+        <div class="q">Should the church square be sealed too?</div>
+        <p>
+          A Manifesta&ccedil;&atilde;o fights alone; O Noivo fights with the
+          guest list still arriving. That reads as two different kinds of fight,
+          which is the argument for leaving it &mdash; but it does make the
+          final boss the messier of the two.
+        </p>
+      </div>
+      <div class="decision">
+        <div class="q">Act II does not end in anything.</div>
+        <p>
+          It is the longest act and the only one without a fight at the end of
+          it. A miniboss on the way into the pra&ccedil;a would give the middle
+          of the run the shape the other two acts have.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    UI panels from <a href="https://kenney.nl">Kenney</a>'s Pixel UI Pack (CC0).
+    Everything else drawn for this project.
+  </footer>
+
+</div>

@@ -1,0 +1,590 @@
+<title>Spawn Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  /* Same tokens as the SOUL build scope, so the two read as one set. */
+  :root {
+    --ground:      #e7e1d5;
+    --surface:     #f0ebe1;
+    --surface-2:   #dcd5c6;
+    --line:        #c6bda9;
+    --line-soft:   #d5cdbb;
+    --ink:         #22252b;
+    --ink-2:       #4c4f57;
+    --muted:       #6f7078;
+    --alien:       #7a3ec4;
+    --alien-soft:  #7a3ec41f;
+    --caatinga:    #4e7a24;
+    --earth:       #a6621f;
+
+    --display: 'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
+    --body: 'Newsreader', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:     #131519;
+      --surface:    #1a1d23;
+      --surface-2:  #23272f;
+      --line:       #333944;
+      --line-soft:  #262b33;
+      --ink:        #e9e3d5;
+      --ink-2:      #c2bcae;
+      --muted:      #8d8c86;
+      --alien:      #c084f5;
+      --alien-soft: #c084f524;
+      --caatinga:   #9ccc5e;
+      --earth:      #d99b52;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:     #131519;
+    --surface:    #1a1d23;
+    --surface-2:  #23272f;
+    --line:       #333944;
+    --line-soft:  #262b33;
+    --ink:        #e9e3d5;
+    --ink-2:      #c2bcae;
+    --muted:      #8d8c86;
+    --alien:      #c084f5;
+    --alien-soft: #c084f524;
+    --caatinga:   #9ccc5e;
+    --earth:      #d99b52;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 19px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 20px 90px;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header { padding: 64px 0 34px; border-bottom: 2px solid var(--line); }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--earth);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(38px, 7vw, 62px);
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    margin: 0 0 16px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 21px;
+    color: var(--ink-2);
+    max-width: var(--measure);
+    margin: 0;
+  }
+
+  section { padding: 44px 0 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 0 0 18px; }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--alien);
+    font-weight: 600;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(24px, 4vw, 33px);
+    letter-spacing: -0.014em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 20px;
+    margin: 30px 0 10px;
+    letter-spacing: -0.006em;
+  }
+  p { max-width: var(--measure); margin: 0 0 16px; }
+  ul, ol { max-width: var(--measure); padding-left: 22px; margin: 0 0 16px; }
+  li { margin: 0 0 8px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.84em;
+    background: var(--alien-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .scroller { overflow-x: auto; margin: 0 0 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 16.5px; min-width: 480px; }
+  th, td {
+    text-align: left;
+    padding: 10px 14px 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .callout {
+    border-left: 3px solid var(--earth);
+    background: var(--alien-soft);
+    padding: 15px 20px;
+    margin: 0 0 20px;
+    max-width: var(--measure);
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .now { color: var(--earth); font-weight: 500; }
+  .then { color: var(--caatinga); font-weight: 500; }
+
+  figure { margin: 26px 0; }
+  figcaption {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 12px;
+    max-width: var(--measure);
+    line-height: 1.55;
+  }
+  svg { display: block; width: 100%; height: auto; }
+
+  .phase {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 18px 22px;
+    margin: 0 0 14px;
+    max-width: var(--measure);
+  }
+  .phase-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .phase-n {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--alien);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .phase h3 { margin: 0; font-size: 18px; }
+  .phase p { margin: 8px 0 0; font-size: 17.5px; }
+  .phase .cost {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .q {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 6px;
+  }
+  .decision { margin: 0 0 22px; max-width: var(--measure); }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 15.5px;
+    color: var(--muted);
+    max-width: var(--measure);
+  }
+  footer a { color: var(--alien); }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">SOUL · design proposal</p>
+  <h1>Spawn Director</h1>
+  <p class="standfirst">
+    The spawner currently keeps a headcount. Vampire Survivors runs a schedule.
+    That single difference is why our crowds feel like weather and theirs feel
+    like an author is in the room — and it is fixable without touching the
+    bestiary.
+  </p>
+</header>
+
+<!-- 1 -->
+<section>
+  <div class="sec-head"><span class="sec-num">01</span><h2>What ours does now</h2></div>
+
+  <p>
+    Every frame, <code>updateSpawner</code> computes a target population and
+    tops it up:
+  </p>
+
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Step</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td>Recycle</td><td>Anything past <code>DESPAWN_RADIUS</code> (780) is deleted</td></tr>
+        <tr><td>Target</td><td><code>baseDensity + densityRamp × (distance/1000)</code>, plus a small time term</td></tr>
+        <tr><td>Fill</td><td>Spend <code>spawnCredit</code> (24/sec) until the population reaches target</td></tr>
+        <tr><td>Place</td><td>82% inside a cone centred on the aim, at the view edge; 18% anywhere</td></tr>
+        <tr><td>Waves</td><td>Every 42s, a full ring of 32→110 bodies at once</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>It works, and it has four structural problems:</p>
+
+  <ul>
+    <li><strong>Density is a scalar, so the fight has no shape.</strong> A
+      number of bodies arrives per second from roughly the same place, for ever.
+      Nothing about minute six is different in kind from minute two — only
+      bigger.</li>
+    <li><strong>Composition is a weight table, so species arrive blended.</strong>
+      Once four things are unlocked you get a smoothie of all four rather than
+      "here come the saleiros".</li>
+    <li><strong>The one wave type is the only punctuation we have</strong> —
+      and it is always the same full ring.</li>
+    <li><strong>The kill-count gates are coupled to enemy health.</strong>
+      Already re-derived twice this project, for exactly that reason.</li>
+  </ul>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="sec-head"><span class="sec-num">02</span><h2>What Vampire Survivors actually does</h2></div>
+
+  <p>
+    Researched rather than assumed. The load-bearing facts:
+  </p>
+
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Mechanic</th><th>How it works there</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Waves are the unit</strong></td>
+          <td>One wave <em>per minute of stage time</em>. The wave — not a density curve — is what defines who shows up and how fast.</td>
+        </tr>
+        <tr>
+          <td><strong>Quota, then top-up</strong></td>
+          <td>Each wave names a <em>minimum population</em> and a spawn interval. Below quota, it spawns until the quota is filled. At or above quota, it spawns <em>one of each type in the wave</em> per interval.</td>
+        </tr>
+        <tr>
+          <td><strong>Hard population cap</strong></td>
+          <td>At <span class="num">300</span> alive, periodic spawning stops entirely. Only bosses and map events can still spawn.</td>
+        </tr>
+        <tr>
+          <td><strong>Off-screen spawn, distance despawn</strong></td>
+          <td>Enemies appear just outside the view and are recycled when the player gets far enough away. Bosses do <em>not</em> despawn — they teleport back into view.</td>
+        </tr>
+        <tr>
+          <td><strong>Map events</strong></td>
+          <td>Scheduled set pieces <em>outside</em> the normal cycle: a swarm sweeping across the screen, or a ring of high-health enemies closing on the player. Tied to a wave, firing at the same second every run.</td>
+        </tr>
+        <tr>
+          <td><strong>Cycles</strong></td>
+          <td>Past the last minute, waves restart from minute 0 and the stage counts as complete — the table loops rather than extrapolating.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p>
+      <strong>The insight worth stealing is the second row.</strong> Their
+      spawner is not a rate — it is a <em>quota with a composition</em>. "Keep
+      forty of these on the field, and every two seconds add one of each kind
+      in this wave" produces a fight with a recognisable character, and it is
+      barely more code than what we have.
+    </p>
+  </div>
+
+  <p>
+    Worth noting what they <em>don't</em> do: there is no aim-cone weighting,
+    no distance-driven density, and no continuous difficulty curve. Escalation
+    is entirely authored, one table row per minute.
+  </p>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="sec-head"><span class="sec-num">03</span><h2>The proposal</h2></div>
+
+  <p>
+    Replace the density scalar with a <strong>wave table per act</strong>, and
+    add a small library of <strong>formations</strong> so that arrivals have
+    shape. Keep our two genuinely good ideas — the facing cone, and progression
+    driven by distance rather than a clock.
+  </p>
+
+  <h3>The wave table</h3>
+  <p>
+    Each act becomes a list of entries keyed to <em>distance</em>, not time —
+    this is a journey, and that difference is ours to keep:
+  </p>
+
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>fromX</code></td><td>World X this entry takes over at</td></tr>
+        <tr><td><code>quota</code></td><td>Population to hold on the field</td></tr>
+        <tr><td><code>interval</code></td><td>Seconds between top-up spawns once at quota</td></tr>
+        <tr><td><code>cast</code></td><td>Which species, and in what ratio — the wave's <em>character</em></td></tr>
+        <tr><td><code>event?</code></td><td>An optional formation to fire on entry</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    This kills the kill-count gates outright. A species appears because a wave
+    <em>asks</em> for it, so the bestiary's pacing stops being an emergent
+    consequence of how tanky things happen to be — which is what has broken it
+    twice.
+  </p>
+
+  <h3>Formations</h3>
+  <p>
+    Right now everything arrives one way: scattered at the view edge, mostly
+    ahead. Four shapes cover almost everything VS does with its map events, and
+    each says something different:
+  </p>
+
+  <figure>
+    <svg viewBox="0 0 880 250" role="img" aria-label="Four spawn formations: cone, ring, wall and pincer, each shown around a central player marker">
+      <defs>
+        <marker id="ah" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <!-- CONE -->
+      <g>
+        <rect x="8" y="26" width="200" height="164" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="8" y="18" font-family="var(--mono)" font-size="12" fill="var(--earth)">CONE — today</text>
+        <circle cx="80" cy="108" r="7" fill="var(--alien)"/>
+        <line x1="88" y1="108" x2="140" y2="108" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <g fill="var(--caatinga)">
+          <circle cx="186" cy="60" r="5"/><circle cx="196" cy="96" r="5"/>
+          <circle cx="192" cy="132" r="5"/><circle cx="178" cy="164" r="5"/>
+          <circle cx="164" cy="46" r="5"/><circle cx="200" cy="118" r="5"/>
+        </g>
+        <text x="8" y="212" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Pressure you walk into.</text>
+        <text x="8" y="230" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Keep as the default.</text>
+      </g>
+
+      <!-- RING -->
+      <g transform="translate(224,0)">
+        <rect x="8" y="26" width="200" height="164" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="8" y="18" font-family="var(--mono)" font-size="12" fill="var(--earth)">RING</text>
+        <circle cx="108" cy="108" r="7" fill="var(--alien)"/>
+        <circle cx="108" cy="108" r="74" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+        <g fill="var(--caatinga)">
+          <circle cx="108" cy="34" r="5"/><circle cx="160" cy="56" r="5"/>
+          <circle cx="182" cy="108" r="5"/><circle cx="160" cy="160" r="5"/>
+          <circle cx="108" cy="182" r="5"/><circle cx="56" cy="160" r="5"/>
+          <circle cx="34" cy="108" r="5"/><circle cx="56" cy="56" r="5"/>
+        </g>
+        <text x="8" y="212" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Closes on you. No safe</text>
+        <text x="8" y="230" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">direction — punish standing.</text>
+      </g>
+
+      <!-- WALL -->
+      <g transform="translate(448,0)">
+        <rect x="8" y="26" width="200" height="164" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="8" y="18" font-family="var(--mono)" font-size="12" fill="var(--earth)">WALL</text>
+        <circle cx="70" cy="108" r="7" fill="var(--alien)"/>
+        <g fill="var(--caatinga)">
+          <circle cx="172" cy="40" r="5"/><circle cx="172" cy="63" r="5"/>
+          <circle cx="172" cy="86" r="5"/><circle cx="172" cy="109" r="5"/>
+          <circle cx="172" cy="132" r="5"/><circle cx="172" cy="155" r="5"/>
+          <circle cx="172" cy="178" r="5"/>
+          <circle cx="194" cy="52" r="5"/><circle cx="194" cy="98" r="5"/>
+          <circle cx="194" cy="144" r="5"/>
+        </g>
+        <line x1="160" y1="108" x2="120" y2="108" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="8" y="212" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">A line sweeping across.</text>
+        <text x="8" y="230" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Go around, or through.</text>
+      </g>
+
+      <!-- PINCER -->
+      <g transform="translate(672,0)">
+        <rect x="8" y="26" width="200" height="164" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="8" y="18" font-family="var(--mono)" font-size="12" fill="var(--earth)">PINCER</text>
+        <circle cx="108" cy="108" r="7" fill="var(--alien)"/>
+        <g fill="var(--caatinga)">
+          <circle cx="30" cy="80" r="5"/><circle cx="30" cy="108" r="5"/><circle cx="30" cy="136" r="5"/>
+          <circle cx="52" cy="94" r="5"/><circle cx="52" cy="122" r="5"/>
+          <circle cx="186" cy="80" r="5"/><circle cx="186" cy="108" r="5"/><circle cx="186" cy="136" r="5"/>
+          <circle cx="164" cy="94" r="5"/><circle cx="164" cy="122" r="5"/>
+        </g>
+        <line x1="66" y1="108" x2="90" y2="108" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <line x1="150" y1="108" x2="126" y2="108" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="8" y="212" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Both flanks at once.</text>
+        <text x="8" y="230" font-family="var(--body)" font-size="13.5" fill="var(--ink-2)">Move perpendicular or die.</text>
+      </g>
+    </svg>
+    <figcaption>
+      Purple is the player. Each formation asks a different question, which is
+      the point — one arrival pattern can only ever ask one.
+    </figcaption>
+  </figure>
+
+  <h3>Two rules to import wholesale</h3>
+  <ul>
+    <li><strong>A hard cap that stops the trickle, not the events.</strong> Ours
+      is <code>MAX_ENEMIES: 700</code> and applies to everything. Theirs is 300
+      and exempts bosses and events — so a set piece always lands, even in a
+      crowd. That exemption is the good part.</li>
+    <li><strong>Elites and bosses never despawn.</strong> Ours already skips
+      elites in the recycler. VS goes further and teleports them back into
+      view. Worth copying for the Doido do Carro, which currently vanishes if
+      you outrun it.</li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section>
+  <div class="sec-head"><span class="sec-num">04</span><h2>How I would build it</h2></div>
+
+  <p>Ordered so that each step is shippable on its own and testable in the console.</p>
+
+  <div class="phase">
+    <div class="phase-top">
+      <span class="phase-n">01</span><h3>Quota replaces density</h3>
+      <span class="cost">small</span>
+    </div>
+    <p>
+      Swap <code>baseDensity/densityRamp</code> for <code>quota</code> and
+      <code>interval</code> per wave entry, with the top-up rule: below quota,
+      fill; at quota, one of each species in the cast per interval. No new
+      content — the existing tables become one wave entry each, so behaviour is
+      near-identical and everything downstream keeps working.
+    </p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-top">
+      <span class="phase-n">02</span><h3>The wave table, keyed to distance</h3>
+      <span class="cost">medium</span>
+    </div>
+    <p>
+      Write 6–8 entries per act with explicit casts. Delete
+      <code>unlockKills</code> entirely — a species now appears because a wave
+      asks for it. This is where the bestiary's pacing stops being an accident
+      of enemy health, and it is the step that pays for the whole rework.
+    </p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-top">
+      <span class="phase-n">03</span><h3>Formations</h3>
+      <span class="cost">small</span>
+    </div>
+    <p>
+      One function, four shapes: <code>cone</code>, <code>ring</code>,
+      <code>wall</code>, <code>pincer</code>. The current wave code already does
+      <code>ring</code> — this generalises it and lets a wave entry name one.
+    </p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-top">
+      <span class="phase-n">04</span><h3>Set pieces</h3>
+      <span class="cost">medium</span>
+    </div>
+    <p>
+      Scheduled, authored moments: the cattle stampede on the road, a glowie
+      cordon across a Floriano street, the car doing a run down the highway with
+      a wall behind it. These are what people will remember, and none of them
+      are possible while spawning is a scalar.
+    </p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-top">
+      <span class="phase-n">05</span><h3>Cap and despawn rules</h3>
+      <span class="cost">small</span>
+    </div>
+    <p>
+      Cap exempts bosses and set pieces. Elites teleport back into view instead
+      of vanishing. Re-measure the frame cost at the new cap.
+    </p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="sec-head"><span class="sec-num">05</span><h2>Calls I need from you</h2></div>
+
+  <div class="decision">
+    <p class="q">Distance or time?</p>
+    <p>
+      VS keys everything to stage minutes. Ours is a journey with a destination,
+      so I would key waves to <strong>world X</strong> and keep time as a minor
+      term — but that means a player who stands still stops progressing the
+      bestiary, which VS never has to think about. <span class="then">My
+      recommendation: distance.</span>
+    </p>
+  </div>
+
+  <div class="decision">
+    <p class="q">Does the population cap come down?</p>
+    <p>
+      Ours is 700, theirs is 300. We measured 415 on screen at
+      <span class="num">1.08 ms</span> a frame, so 700 is affordable — but
+      "affordable" and "readable" are different questions, and at current
+      contact damage a crowd of 700 is not a fight anyone survives.
+      <span class="then">My recommendation: 300, with events exempt.</span>
+    </p>
+  </div>
+
+  <div class="decision">
+    <p class="q">Do the aim-cone spawns survive?</p>
+    <p>
+      It is ours, not VS's, and it is genuinely good — pointing somewhere means
+      walking into more of it. But it fights formations: a ring is not a ring if
+      82% of it arrives in front of you.
+      <span class="then">My recommendation: cone stays for the trickle,
+      formations ignore it.</span>
+    </p>
+  </div>
+
+  <div class="decision">
+    <p class="q">How much of the bestiary's pacing do you want authored?</p>
+    <p>
+      The kill gates were an attempt to have pacing emerge on its own. It has
+      not worked twice. Authoring it per wave is more writing but it is the only
+      version that stays correct when you retune enemy health — which you do
+      regularly, and should be able to keep doing.
+    </p>
+  </div>
+</section>
+
+<footer>
+  Vampire Survivors mechanics researched from the
+  <a href="https://vampire.survivors.wiki/w/Enemies">community wiki's Enemies page</a>,
+  <a href="https://vampire-survivors.fandom.com/wiki/Category:Map_events">map events index</a>
+  and <a href="https://vampire.survivors.wiki/w/Timed_Enemy_Spawn">Timed Enemy Spawn</a>.
+  Current-behaviour figures are from <code>spawner.ts</code>, <code>config.ts</code>
+  and <code>stages.ts</code> as they stand today.
+</footer>
+
+</div>

@@ -1,0 +1,1849 @@
+:root {
+  --ink: #f4ecd8;
+  --ink-dim: #cbbda0;
+  --hp: #d94f4f;
+  --xp: #5adcff;
+  --gold: #ffd479;
+  /*
+   * THE ENEMY'S COLOUR, and it is the aliens' own green.
+   *
+   * It was purple, which meant nothing — the game has no purple anywhere else
+   * and a boss bar in a colour with no other job is just a colour. Green is
+   * already what "them" looks like from the first Coisa Voadora to the
+   * mothership, so the bar reads as belonging to the thing it is measuring
+   * rather than to the HUD.
+   */
+  --boss: #6fd97a;
+  --boss-hi: #a8f0ad;
+  --panel-shadow: 0 6px 0 rgba(0, 0, 0, 0.45);
+  --title: 'Press Start 2P', ui-monospace, monospace;
+  /*
+   * ONE FACE FOR EVERYTHING.
+   *
+   * The body text used to be VT323 — a CRT terminal face, retro but not 8-bit,
+   * and narrow enough that its sizes do not survive the swap. Every body size
+   * in this file was rescaled by 0.46 when the family changed; anything on
+   * `--title` was left alone because those numbers were chosen for this face
+   * to begin with.
+   */
+  --body: 'Press Start 2P', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: #0d0f10;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--body);
+  /*
+   * Square glyphs with no descender crowd each other at the line heights a
+   * condensed face is happy with. Everything gets air unless a rule says
+   * otherwise.
+   */
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  -webkit-font-smoothing: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  /*
+   * `dvh` so the canvas tracks a mobile browser's URL bar sliding away, rather
+   * than being sized to the tallest the viewport ever was and leaving its
+   * bottom row — which is where the action bar lives — under the chrome.
+   * The percentage underneath is what a browser without `dvh` gets, and it is
+   * what this always used to be.
+   */
+  height: 100%;
+  height: 100dvh;
+  /* Stops the browser from treating a drag on the game as a scroll gesture. */
+  touch-action: none;
+}
+
+.stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+/* ------------------------------------------------------------------ HUD -- */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.hud-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 16px;
+}
+
+.hud-left { display: flex; flex-direction: column; gap: 6px; width: min(260px, 32vw); }
+.hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.hud-center { text-align: center; width: min(420px, 46vw); }
+
+.bar {
+  position: relative;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #ff7a6b, var(--hp));
+  transition: width 120ms linear;
+}
+
+.bar-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.lvl { font-family: var(--title); font-size: 9px; color: var(--gold); text-shadow: 1px 1px 0 #000; }
+
+.stage-name {
+  font-family: var(--title);
+  font-size: 10px;
+  text-shadow: 1px 1px 0 #000;
+  margin-bottom: 6px;
+}
+
+.stage-sub { font-size: 8px; color: var(--ink-dim); margin-top: 5px; }
+
+.road {
+  position: relative;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.road-fill { height: 100%; background: var(--gold); transition: width 200ms linear; }
+
+.road-icon {
+  position: absolute;
+  top: -13px;
+  transform: translateX(-50%) rotate(90deg);
+  font-size: 6px;
+  color: var(--gold);
+  transition: left 200ms linear;
+}
+
+.stat { font-size: 9px; text-shadow: 1px 1px 0 #000; }
+.stat.big { font-family: var(--title); font-size: 14px; }
+.stat.dim { color: var(--ink-dim); font-size: 7px; }
+
+.bossbar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 46px; width: min(560px, 78vw); text-align: center; }
+.bossbar-name { font-family: var(--title); font-size: 9px; color: var(--boss); margin-bottom: 5px; text-shadow: 1px 1px 0 #000; }
+.bar-boss { height: 14px; }
+.bar-boss .bar-fill { background: linear-gradient(180deg, var(--boss-hi), var(--boss)); }
+
+.xpbar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  border-top: 2px solid rgba(0, 0, 0, 0.9);
+}
+
+.xpbar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #b6f2ff, var(--xp));
+  transition: width 120ms linear;
+}
+
+/*
+ * Ammo rack, bottom-left. It used to sit above the ability strip; that strip
+ * has been folded into the build, so this drops into the corner it left. What
+ * is loaded is a thing you change mid-fight, so it has to be readable without
+ * looking away from the middle of the screen.
+ */
+.ammo {
+  position: absolute;
+  left: 14px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ammo-slot {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  opacity: 0.45;
+}
+
+.ammo-on {
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.ammo-hint {
+  font-family: var(--title);
+  font-size: 9px;
+  color: var(--ink-dim);
+  margin-left: 2px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Art that exists. */
+img.pixicon { image-rendering: pixelated; display: block; }
+
+/* Art that does not exist yet — obviously a placeholder, not a broken page. */
+.pixicon-missing {
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  color: var(--ink-dim);
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+
+/* Title card between acts. */
+.banner {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: min(700px, 90vw);
+}
+
+.banner-title {
+  font-family: var(--title);
+  font-size: clamp(12px, 2.4vw, 22px);
+  letter-spacing: 1px;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.banner-sub { font-size: clamp(8px, 2vw, 11px); color: var(--ink-dim); margin-top: 12px; text-shadow: 2px 2px 0 #000; }
+
+/* -------------------------------------------------------------- OVERLAYS -- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  /* `safe` matters here: with plain centring, an overlay taller than the
+     viewport is clipped at BOTH ends and the controls at the bottom become
+     unreachable — which happened to the swap screen's decline button. Safe
+     centring falls back to start-alignment the moment content overflows, so
+     everything stays scrollable to. */
+  align-content: safe center;
+  background: rgba(8, 10, 12, 0.72);
+  backdrop-filter: blur(2px);
+  padding: 20px;
+  overflow: auto;
+}
+
+.menu {
+  width: min(560px, 100%);
+  text-align: center;
+  background-clip: padding-box;
+  filter: drop-shadow(var(--panel-shadow));
+}
+
+.menu.small { width: min(440px, 100%); }
+
+/*
+ * The walk cycle, played straight off the source PNG at 6x.
+ * The three poses in Andando.png are hand-placed rather than gridded, so the
+ * positions below are the measured centre of each pose instead of an even
+ * step. (In game the loader re-packs the same sheet automatically; this is the
+ * one place that reads the raw file, so it does the arithmetic by hand.)
+ */
+.marquee {
+  width: 96px;
+  height: 120px;
+  margin: 0 auto 10px;
+  background-image: url('/sprites/main_oindigena/main/Andando.png');
+  background-size: 384px 192px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  animation: walk 0.54s steps(1, end) infinite;
+}
+
+@keyframes walk {
+  0%,   33.3% { background-position: -27px -42px; }
+  33.4%, 66.6% { background-position: -129px -42px; }
+  66.7%, 100% { background-position: -225px -42px; }
+}
+
+.title {
+  font-family: var(--title);
+  font-size: clamp(28px, 7vw, 52px);
+  margin: 0 0 10px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 #000;
+}
+
+.title.sm { font-size: clamp(14px, 3.4vw, 22px); }
+.title.danger { color: #ff7a6b; }
+.title.win { color: #9bf08a; }
+
+.tagline { font-size: 10px; color: var(--ink); margin: 0 0 14px; }
+.story { font-size: 9px; color: var(--ink-dim); margin: 0 auto 22px; max-width: 42ch; line-height: 1.25; }
+
+/* The old Kenney button lived here. Every button in the game is a `.pill`
+   off the UI sheet now — see the PILLS block below. */
+
+.controls {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  font-size: 9px;
+  color: var(--ink-dim);
+  line-height: 1.45;
+}
+
+.controls b { color: var(--ink); }
+
+/* ------------------------------------------------------------- LEVEL UP -- */
+
+/*
+ * `100%`, NOT `96vw`.
+ *
+ * `.overlay` is a 20px-padded scroll container, and `vw` measures the WHOLE
+ * viewport regardless of that padding — so at 834px wide this asked for
+ * 801px of card inside a 794px column and the level-up screen came with a
+ * horizontal scrollbar. Measured: 841 of content in 834 of box, which is
+ * exactly the two paddings. A percentage is of the column, which is the
+ * number that was meant all along.
+ *
+ * The same correction is on `.menu` and `.runend` for the same reason.
+ */
+.levelup { text-align: center; width: min(900px, 100%); }
+
+.lvl-title {
+  font-family: var(--title);
+  font-size: clamp(14px, 3vw, 22px);
+  /* Gold, like every other heading on a panel. The cyan here was the HUD
+     accent leaking onto a screen that has no HUD on it. */
+  color: var(--gold);
+  text-shadow: 3px 3px 0 #000;
+  margin: 0 0 22px;
+}
+
+/* How much of the capped build is already spent. Sits above the cards so it
+   is read before the choice rather than discovered after it. */
+/* Sorte and its charges, under the level read-out. */
+.luck {
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: #8fe07a;
+  text-shadow: 2px 2px 0 #000;
+}
+.luck-crit { color: #ffd24a; }
+.absorb { display: flex; gap: 3px; margin-top: 3px; }
+.absorb i {
+  width: 9px;
+  height: 9px;
+  background: #9be8b0;
+  box-shadow: 0 0 4px #9be8b0, 2px 2px 0 #000;
+}
+
+/* Gamble results, ticking down under the level read-out. */
+.fx { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.fx-tag {
+  font-size: 6px;
+  letter-spacing: 1px;
+  color: #9be8b0;
+  text-shadow: 2px 2px 0 #000;
+}
+.fx-tag.bad { color: #ff9b9b; }
+.fx-tag b { color: #f2e6cf; }
+
+/* The swap prompt: one card coming in, six that could go out. Deliberately
+   compact — it has to fit a short laptop window without the decline button
+   falling off the bottom of it. */
+.swap .lvl-title { margin-bottom: 12px; }
+.swap .card.incoming {
+  width: min(210px, 70vw);
+  min-height: 0;
+  padding-bottom: 6px;
+}
+.swap .card.incoming .card-desc { font-size: 7px; }
+/* The swap prompt: one card coming in, six that could go out. */
+.swap-ask {
+  font-family: var(--title);
+  font-size: 11px;
+  color: var(--xp);
+  text-shadow: 2px 2px 0 #000;
+  margin: 12px 0 10px;
+}
+.swap-grid { gap: 10px; }
+.card.small {
+  width: min(132px, 30vw);
+  min-height: 110px;
+  gap: 4px;
+}
+.card.small .card-name { font-size: 8px; }
+.card-icon.sm { width: 40px; height: 40px; }
+.card[disabled] { cursor: default; }
+
+.slotbar {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin: 0 0 18px;
+  font-size: 7px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+.slotbar b { color: #f2e6cf; }
+/* Reads like the two counters beside it, and goes quiet once it is all spent
+   rather than disappearing @ a row that changes width mid-screen is worse
+   than a row with a dead entry in it. */
+.slotbar .rr b { color: var(--gold); }
+.slotbar .rr.out { color: #6b6357; }
+.slotbar .rr.out b { color: #6b6357; }
+.slotbar .lucky b { color: #8fe07a; }
+
+.cards { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ---- DEALT, NOT SWAPPED -------------------------------------------------
+   A reroll used to change three names and nothing moved, which reads as the
+   screen glitching rather than as a machine dealing you a new hand. Each card
+   turns in on its edge, staggered by a beat, so the eye follows left to right
+   and the last one lands just after the ticket sound.
+
+   Driven by a `key` on the container in `LevelUp` @ CSS animations do not
+   restart on an element React merely updated, so the three cards have to be
+   genuinely new nodes. 240ms and it is over: this is on the path between the
+   player and their build, and flair that has to be waited through is a cost,
+   not a reward. */
+/* IT NEVER STARTS FROM NOTHING. An edge-on card at zero opacity means the
+   row is EMPTY for the first frames, and with the third card's delay on top
+   of the snapshot's own 15Hz latency that was most of half a second of blank
+   screen where the hand should be. Starting part-turned and part-visible
+   reads as cards flipping; starting at zero reads as cards missing. */
+@keyframes deal {
+  0% { transform: perspective(700px) rotateY(-64deg) scale(0.94); opacity: 0.15; }
+  100% { transform: perspective(700px) rotateY(0deg) scale(1); opacity: 1; }
+}
+.cards .card { animation: deal 200ms cubic-bezier(0.2, 0.9, 0.3, 1) backwards; }
+.cards .card:nth-child(2) { animation-delay: 45ms; }
+.cards .card:nth-child(3) { animation-delay: 90ms; }
+
+/* A cheap gold wipe across the row as the hand lands. It is the thing that
+   makes the deal feel PAID for.
+
+   THE GRADIENT MOVES, NOT THE ELEMENT. Sliding a full-width overlay with
+   `translateX(130%)` puts a thousand pixels of it past the right edge, and
+   `.overlay` is a scroll container @ measured 1037px of horizontal overflow,
+   with the scrollbar to prove it. A background position costs the same and
+   stays inside its own box. */
+@keyframes dealt-sweep {
+  0% { opacity: 0.75; background-position: 130% 0; }
+  100% { opacity: 0; background-position: -30% 0; }
+}
+.cards::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 212, 121, 0.24) 50%, transparent 62%);
+  background-size: 300% 100%;
+  animation: dealt-sweep 420ms ease-out forwards;
+}
+.cards { position: relative; }
+
+/* Nobody should be made motion-sick by a card game. */
+@media (prefers-reduced-motion: reduce) {
+  .cards .card { animation: none; }
+  .cards::after { animation: none; opacity: 0; }
+}
+
+/* ---- OUTRAS CARTAS ------------------------------------------------------
+   THREE PER RUN, AND THE PIPS ARE THE READOUT.
+
+   The button is deliberately quieter than a card: taking a card is the thing
+   this screen is for, and a reroll styled like a fourth option would compete
+   with the three that matter. Spent, it goes grey and stays put @ a control
+   that disappears reads as a bug rather than as something used up. */
+.reroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-height: 700px) {
+  .reroll { margin-top: 10px; }
+}
+
+.card {
+  width: min(230px, 78vw);
+  min-height: 190px;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #2c2113;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.5));
+  transition: transform 90ms ease;
+}
+
+.card:hover { transform: translateY(-4px); }
+.card-icon {
+  width: 64px;
+  height: 64px;
+  /* The icons are dark line art; a soft glow lifts them off the tan panel. */
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.28));
+}
+.card-name { font-family: var(--title); font-size: 10px; line-height: 1.5; }
+.card-desc { font-size: 9px; color: #5a4630; }
+
+/* The tier, and what the card costs you. */
+.card-rarity {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #7b6a4e;
+}
+.card-slot {
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: #7b6a4e;
+  text-transform: uppercase;
+}
+.card-slot.have { color: #4f7a3a; }
+.card-slot.last { color: #a8442e; }
+
+/* Rarity reads on the card itself: a coloured rim and, at the top tier, a
+   glow. A legendary should be visible from across the room. */
+.rar-incomum  { filter: drop-shadow(0 4px 0 rgba(0,0,0,0.5)) drop-shadow(0 0 4px #4f9b4f); }
+.rar-raro     { filter: drop-shadow(0 4px 0 rgba(0,0,0,0.5)) drop-shadow(0 0 7px #4b7fd6); }
+.rar-lendario { filter: drop-shadow(0 4px 0 rgba(0,0,0,0.5)) drop-shadow(0 0 11px #f0b24a); }
+.rar-incomum  .card-rarity { color: #3d7a3d; }
+.rar-raro     .card-rarity { color: #2f5fa8; }
+.rar-lendario .card-rarity { color: #9c6a12; }
+
+/* ----------------------------------------------------------------- MISC -- */
+
+.stats { display: flex; justify-content: center; gap: 26px; margin: 0 0 20px; }
+.stats div { display: flex; flex-direction: column; gap: 2px; }
+.stats dt { font-size: 7px; color: var(--ink-dim); text-transform: uppercase; }
+.stats dd { font-family: var(--title); font-size: 12px; margin: 0; color: var(--gold); }
+
+.loading { font-family: var(--title); font-size: 12px; color: var(--ink-dim); }
+
+/* ============================================================= THE BOOT ==
+   The first screen, and the one that has to be right before anybody has
+   decided whether to keep playing. Same ground and same palette as the front
+   door so the two read as one place — this is the menu arriving, not a
+   different screen that precedes it. */
+.overlay.boot {
+  display: grid;
+  place-items: center;
+  background: #06080a;
+  backdrop-filter: none;
+  /*
+   * NOT SCROLLABLE, AND NOT PADDED.
+   *
+   * `.overlay` is `overflow: auto` on purpose — a level-up screen taller than
+   * a short window has to be reachable. This one inherited it and should not
+   * have: the tiled backdrop below is an absolutely positioned pseudo-element
+   * at `inset: -120px`, deliberately bled past every edge so the tile never
+   * shows a seam, and inside a scroll container a bleed to the right and
+   * bottom is CONTENT. The loading screen was scrollable by exactly 120px in
+   * both axes — measured — so a trackpad swipe slid the whole thing off
+   * centre before the game had even started.
+   *
+   * Nothing here can overflow: one fixed-width column, centred. So the scroll
+   * container is simply wrong, and the padding with it.
+   */
+  overflow: hidden;
+  padding: 0;
+}
+.overlay.boot::before {
+  content: '';
+  position: absolute;
+  /*
+   * `inset: 0`, and it used to be -120px.
+   *
+   * The bleed was copied from `.menu-ground`, where it earns its place: that
+   * layer DRIFTS, and a background-position animated six hundred pixels has to
+   * have six hundred pixels of tile to walk across. This one is static, so the
+   * bleed bought nothing at all and cost the whole screen — 120px of overflow
+   * to the right and to the bottom, inside a scroll container, which is what a
+   * trackpad was sliding around.
+   *
+   * `overflow: hidden` above already stops a person scrolling it. This is so
+   * there is nothing to scroll in the first place.
+   */
+  inset: 0;
+  background: url(/ui/menu_bg.png) repeat 0 0 / 300px 300px;
+  image-rendering: pixelated;
+  opacity: 0.22;
+}
+.overlay.boot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 80% at 50% 45%,
+      rgba(6, 9, 8, 0.2) 0%, rgba(4, 6, 8, 0.92) 70%, #040608 100%);
+}
+
+.boot-in {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(360px, 84vw);
+  text-align: center;
+}
+
+.boot-kicker {
+  font-family: var(--title);
+  font-size: 7px;
+  letter-spacing: 5px;
+  color: #6f8a52;
+  margin: 0;
+}
+.boot-title {
+  font-family: var(--title);
+  font-size: clamp(30px, 11vw, 46px);
+  letter-spacing: 5px;
+  line-height: 1;
+  color: #c3d287;
+  margin: 0 0 4px;
+  text-shadow: 3px 3px 0 #000;
+}
+
+/* The bar. Bamboo colours, hard edges, no rounding — it belongs to the same
+   kit as everything else. */
+.boot-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid #2a2f1d;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.boot-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #b3c47a 0%, #6c7d42 100%);
+  transition: width 180ms ease-out;
+}
+.boot-note {
+  font-family: var(--title);
+  font-size: 7px;
+  line-height: 1.7;
+  color: #6f6858;
+  margin: 0;
+  min-height: 2.4em;
+}
+
+/* ---- who made it --------------------------------------------------------
+   ONE MARK, TWO SCREENS, IDENTICAL.
+
+   The loading screen and the menu are the two places anybody looks before the
+   game starts, and a credit styled differently in each of them reads as two
+   credits. Same size, same colour, same distance off the bottom edge — so the
+   handover from one screen to the other leaves it exactly where it was, which
+   is the one moment it is genuinely noticed.
+
+   Pinned rather than laid out: neither screen has a footer, both centre their
+   contents, and both collapse parts of themselves on short windows. */
+.studio {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--title);
+  font-size: 7px;
+  letter-spacing: 4px;
+  text-align: center;
+  /* Light enough to read on the menu's green ground, dim enough to stay
+     subordinate to the sign above it — it has to hold on both. */
+  color: #75885a;
+  text-shadow: 1px 1px 0 #000, 0 0 6px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+/* Last to arrive on the menu, after the man has finished walking on. A credit
+   that leads the sequence is a title card; one that closes it is a signature. */
+.menu-screen > .studio { animation: cine-rise 1.2s ease-out both; animation-delay: 2.5s; }
+
+@media (max-height: 620px) { .studio { bottom: 10px; } }
+
+@media (max-width: 720px) {
+  .hud { font-size: 8px; padding: 10px; }
+  .hud-top { grid-template-columns: 1fr; gap: 8px; }
+  .hud-center, .hud-left { width: 100%; }
+  .hud-right { flex-direction: row; gap: 12px; align-items: center; }
+  .stage-sub { display: none; }
+}
+
+/* ------------------------------------------------------------ FRONT DOOR -- */
+
+/* =========================================================== THE FRONT DOOR ==
+   One sign hung in the middle of a road that keeps going past it. The block
+   this replaced was a two-column split whose left column was a CSS sunset
+   standing in for key art that was never drawn — see `MainMenu`. */
+
+.overlay.menu-screen {
+  display: block;
+  /* `position` stays the base rule's `absolute`: it already makes this the
+     containing block for the backdrop layers, and overriding it to `relative`
+     took the overlay out from over the canvas and dropped it below. */
+  padding: 0;
+  gap: 0;
+  background: #06080a;
+  backdrop-filter: none;
+  overflow: hidden;
+}
+
+/* THE ROAD, from the game's own ground.
+   `menu_bg.png` is the caatinga tile arranged as a mirrored 2x2 block, which
+   is seamless BY CONSTRUCTION — the raw tile is not, and CSS has no way to
+   mirror per repeat the way the chunk baker does, so a plain repeat of it laid
+   a visible grid across the whole screen.
+   Two layers at decorrelated sizes, drifting at different speeds: one layer
+   at any size still reads as a pattern, and two do not. */
+.menu-ground {
+  position: absolute;
+  inset: -160px;
+  background:
+    url(/ui/menu_bg.png) repeat 0 0 / 300px 300px,
+    url(/ui/menu_bg.png) repeat 0 0 / 470px 470px;
+  image-rendering: pixelated;
+  opacity: 0.42;
+  animation: menu-drift 64s linear infinite;
+}
+@keyframes menu-drift {
+  to { background-position: -600px -180px, 470px -235px; }
+}
+
+/* And key art instead, the day there is any. */
+.menu-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* Everything behind the sign goes down, hard, so the sign is the only lit
+   thing on the screen. */
+.menu-dark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 85% at 50% 44%,
+      rgba(6, 9, 8, 0.15) 0%,
+      rgba(6, 9, 8, 0.78) 58%,
+      rgba(4, 6, 8, 0.97) 100%);
+}
+
+.menu-stack {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.kicker {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 5px;
+  color: #97a860;
+  margin: 0;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* ---- the opening --------------------------------------------------------
+   THE FRONT DOOR ARRIVES, it does not appear.
+
+   Everything on this screen used to be painted in the same frame the assets
+   finished loading, which is the difference between a title screen and a
+   window that has just opened. It comes up out of black now, in the order
+   somebody would read it: the place, then the sign, then the things you can
+   do, then the man walking underneath. The whole sequence is under three
+   seconds and it only plays once, when the page does. */
+.menu-screen > * {
+  animation: cine-in 1s ease-out both;
+}
+.menu-ground, .menu-art { animation-duration: 2.2s; }
+.menu-dark { animation-duration: 2.2s; }
+.menu-stack > * { animation: cine-rise 0.9s ease-out both; }
+.menu-stack > .kicker { animation-delay: 0.5s; }
+.menu-stack > .frame { animation-delay: 0.85s; }
+.menu-stack > .menu-walk { animation-delay: 2.05s; }
+/*
+ * And the three of them in order, inside the sign — ON THE FRONT DOOR ONLY.
+ *
+ * `.menu-actions` is the class every button column uses, so this staggered
+ * arrival was also being applied to the PAUSE screen, where it is nonsense:
+ * pause is not an opening, it is an interruption, and the player sat there for
+ * nearly two seconds watching CONTINUAR, OPÇÕES and CONTROLES fade in one at a
+ * time before they could press any of them. A menu you opened to leave a fight
+ * has to be there the instant it is asked for.
+ */
+.menu-screen .menu-actions > * { animation: cine-rise 0.7s ease-out both; }
+.menu-screen .menu-actions > *:nth-child(1) { animation-delay: 1.5s; }
+.menu-screen .menu-actions > *:nth-child(2) { animation-delay: 1.68s; }
+.menu-screen .menu-actions > *:nth-child(3) { animation-delay: 1.86s; }
+.frame-in > .bigtitle { animation: cine-title 1.1s ease-out both; animation-delay: 1s; }
+.frame-in > .tagline { animation: cine-rise 0.8s ease-out both; animation-delay: 1.35s; }
+
+@keyframes cine-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes cine-rise {
+  from { opacity: 0; transform: translateY(7px) }
+  to { opacity: 1; transform: none }
+}
+/* The word itself gets the one flourish on the screen: it settles in rather
+   than sliding, which is what a thing carved into a plank would do. */
+@keyframes cine-title {
+  from { opacity: 0; transform: scale(1.14); letter-spacing: 13px }
+  to { opacity: 1; transform: none; letter-spacing: 4px }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-screen > *, .menu-stack > *, .menu-screen .menu-actions > *,
+  .menu-screen > .studio,
+  .frame-in > .bigtitle, .frame-in > .tagline {
+    animation: none;
+  }
+}
+
+/* ---- the sign itself -----------------------------------------------------
+   INTEGER SCALES ONLY, picked by breakpoint.
+
+   The panel is 132x117 of hand-drawn pixels. A fluid `min(88vw, ...)` put it
+   on screen at 3.56x, and nearest-neighbour at 3.56x means some rows of the
+   bamboo are four screen pixels tall and their neighbours are three — the
+   nodes and the leaf edges visibly wobble. So the width steps 2x / 3x / 4x /
+   5x and every source pixel is always the same size as every other one.
+
+   Height is left to `aspect-ratio` and never constrained directly: a second
+   constraint would let the browser satisfy both by quietly dropping the ratio,
+   which on a hand-drawn frame means bamboo of two different thicknesses on the
+   same panel. The breakpoints carry a min-height for that reason — they are
+   what keeps the sign short enough for the window it is in. */
+.frame {
+  position: relative;
+  width: 264px;
+  aspect-ratio: 132 / 117;
+  background: url(/ui/menu_panel.png) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.4));
+}
+
+/* The khaki inside the bamboo, to the pixel: the panel is 132x117 and its
+   interior runs x 29..103, y 8..110. */
+.frame-in {
+  position: absolute;
+  left: 21.97%;
+  right: 21.97%;
+  top: 6.84%;
+  bottom: 5.98%;
+  /* The query container is the KHAKI, not the panel — the panel is 44% bamboo
+     and sizing the title against the whole thing ran SOUL out over the poles
+     on a narrow window. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5%;
+  /* Optical, not geometric. The title's 0.9 line-height pulls its glyphs above
+     their own box and the pill's bottom three rows are bevel that reads as
+     shadow, so a mathematically centred column sits high on the plank. */
+  padding-top: 5%;
+  box-sizing: border-box;
+}
+
+/* The word SOUL, cut INTO the sign rather than glowing in front of it. The
+   old one had a purple chromatic edge and a bloom, which is a neon sign, and
+   this is a plank. */
+.bigtitle {
+  font-family: var(--title);
+  /* Press Start 2P is monospaced at one em per glyph, so SOUL is 4em plus the
+     tracking: 22cqw keeps it inside the plank at every step of the scale. */
+  font-size: min(22cqw, 52px);
+  line-height: 0.9;
+  letter-spacing: 4px;
+  color: #4a3a2c;
+  margin: 0;
+  text-shadow: 0 2px 0 rgba(246, 227, 190, 0.5);
+}
+
+.menu-screen .tagline {
+  font-size: 7px;
+  line-height: 1.6;
+  color: #6d5b48;
+  margin: 0;
+  max-width: 22ch;
+  text-shadow: none;
+}
+
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: 100%;
+  align-items: stretch;
+  margin-top: 3%;
+}
+
+/* ---- and he walks the road under it -------------------------------------*/
+.menu-walk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.spritewalk {
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.55));
+}
+.menu-screen .story {
+  font-size: 7px;
+  line-height: 1.8;
+  color: #8d8471;
+  margin: 0;
+  max-width: 46ch;
+  text-shadow: 1px 1px 0 #000;
+}
+
+@media (min-width: 400px) and (min-height: 560px) { .frame { width: 396px; } }
+@media (min-width: 600px) and (min-height: 680px) { .frame { width: 528px; } }
+@media (min-width: 760px) and (min-height: 830px) {
+  .frame { width: 660px; }
+  .frame-in .pill { --pill: 4; font-size: 14px; }
+  .menu-actions { gap: 16px; }
+}
+
+/* Short windows: the prose goes before the sign does. */
+@media (max-height: 620px) {
+  .menu-walk .spritewalk { display: none; }
+  .menu-screen .story { display: none; }
+  .menu-stack { gap: 10px; }
+}
+@media (max-width: 460px) {
+  .kicker { letter-spacing: 3px; }
+}
+
+/* =============================================================== THE PILLS ==
+   Three 48x16 PNGs off the UI sheet, three-sliced: the rounded caps are drawn
+   and stay drawn, the middle stretches. `--pill` is the integer scale, and it
+   is an integer because pixel art at 2.6x has some rows twice as tall as
+   the others.
+
+   The image goes on a positioned ::before rather than on the button, because
+   border-image paints as a BORDER — put it on the button itself and the label
+   is laid out in the three pixels of content box left between the top and
+   bottom slices. On a pseudo-element the whole button is the border box and
+   the label is free to sit where it belongs. */
+.pill {
+  --pill: 3;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(16px * var(--pill));
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #f6e3be;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  transition: transform 70ms ease, filter 70ms ease;
+}
+
+.pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-style: solid;
+  border-width:
+    calc(5px * var(--pill)) calc(8px * var(--pill)) calc(8px * var(--pill));
+  border-image-slice: 5 8 8 8 fill;
+  border-image-width:
+    calc(5px * var(--pill)) calc(8px * var(--pill)) calc(8px * var(--pill));
+  border-image-repeat: stretch;
+  image-rendering: pixelated;
+}
+
+.pill-olive::before { border-image-source: url(/ui/btn_olive.png); }
+.pill-tan::before   { border-image-source: url(/ui/btn_tan.png); }
+.pill-brown::before { border-image-source: url(/ui/btn_brown.png); }
+
+/* Centred on the FACE of the pill, not on the button: the bottom three rows
+   of the sprite are bevel, and a label centred over the whole thing sits
+   visibly low on it. */
+.pill-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 calc(9px * var(--pill)) calc(3px * var(--pill));
+  box-sizing: border-box;
+}
+
+/* The sheet's own arrow, as the cursor. It slides in rather than blinking on,
+   which is the difference between "this one" and "something just changed". */
+.pill-cue {
+  position: absolute;
+  left: calc(5px * var(--pill));
+  top: 50%;
+  width: calc(5px * var(--pill));
+  height: calc(10px * var(--pill));
+  margin-top: calc(-6.5px * var(--pill));
+  background: url(/ui/arrow_cream.png) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 90ms ease, transform 90ms ease;
+}
+.pill:hover .pill-cue,
+.pill:focus-visible .pill-cue { opacity: 1; transform: translateX(0); }
+
+.pill:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.pill:active { transform: translateY(1px); filter: none; }
+.pill:focus-visible { outline: 2px solid #f6e3be; outline-offset: 3px; }
+.pill:disabled { cursor: default; filter: grayscale(0.5) brightness(0.7); }
+
+/* The one you might regret. Brown carries it; the label says the rest. */
+.pill-danger .pill-label { color: #f0a89a; }
+
+/* A pill that is one control on a dialog rather than one of a stacked set. */
+.pill.btn-row {
+  --pill: 2;
+  width: auto;
+  min-width: 190px;
+  margin: 16px auto 0;
+  font-size: 10px;
+}
+.pill.keep { margin-top: 18px; }
+
+@media (max-width: 460px) {
+  .pill { --pill: 2; font-size: 9px; }
+}
+
+/* ---------------------------------------------------------------- OPTIONS -- */
+
+/*
+ * ONE OPTION, CENTRED.
+ *
+ * Two things were off. The block had `margin: 0 0 14px` — no `auto` — so while
+ * the title and the button were centred by the panel, every row of controls
+ * was hard against its left edge. And `1fr auto` shoved the label to the far
+ * left and its value to the far right, so even within a row nothing lined up
+ * with anything above it.
+ *
+ * Now: the block is centred, and the label sits next to its value as one
+ * centred pair with the slider under them.
+ */
+.opt {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
+  gap: 7px 10px;
+  width: min(340px, 86%);
+  margin: 0 auto 16px;
+}
+.opt-name {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--ink-dim);
+}
+.opt-val {
+  font-size: 7px;
+  color: #f2e6cf;
+  font-variant-numeric: tabular-nums;
+  /* Fixed width so the label above does not shuffle sideways as the number
+     goes from 3 to 100 — tabular figures alone do not stop the reflow. */
+  min-width: 3ch;
+  text-align: left;
+}
+.opt input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  /* The sheet's olive, not the HUD's cyan-green: these controls sit inside a
+     bamboo frame now and the old accent was the loudest thing on the screen. */
+  accent-color: #97a860;
+  cursor: pointer;
+}
+.opt input[type="range"]:disabled { opacity: 0.35; cursor: default; }
+
+.toggle {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  color: #d8cdb4;
+  background: #262a1d;
+  border: 2px solid #4a5233;
+  cursor: pointer;
+}
+.toggle.on { color: #1c2016; background: #97a860; border-color: #c3d287; }
+
+/* ------------------------------------------------------------- CONTROLS -- */
+
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  /* Centred as a block, left-aligned inside it: a list of keys and what they
+     do is read down the left, but the list itself belongs in the middle of
+     the panel. Same missing `auto` the options rows had. */
+  margin: 0 auto 22px;
+  width: min(400px, 88%);
+  text-align: left;
+}
+.keys dt {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 1px;
+  /* Olive, like every other label sitting on a bamboo board. The HUD's cyan
+     accent belongs on the HUD, over the world; in here it was the only cold
+     colour on the screen. */
+  color: #b3c47a;
+  white-space: nowrap;
+}
+.keys dd { margin: 0; font-size: 7px; color: #d8cdb4; }
+
+/* ====================================================== PLAYING ON A PHONE ==
+   None of this exists until somebody actually touches the screen — see
+   `Snapshot.touch`. The game was playable on a phone already: you could walk,
+   the revolver aims itself, and a tap is a click. What there was no way to do
+   was press anything, which meant the three abilities that WAIT to be told,
+   the ammo swap, pausing, and the A-D struggle were all simply gone. A grab
+   with no answer to it is not a quick-time event, it is a delay before damage.
+
+   Everything here sends a keycode into the same input struct the keyboard
+   writes to, so there is exactly one set of gameplay code and it never asks
+   what kind of device is playing. */
+
+/* THE ACTION BAR. Bottom right, under the thumb that is not holding the stick
+   — the left one is pinned wherever it first went down. */
+.tapbar {
+  /* `.hud` is pointer-events: none so it never eats a shot. Anything that is
+     actually a control opts back in, one at a time. */
+  pointer-events: auto;
+  position: absolute;
+  /*
+   * BOTTOM LEFT, not bottom right. The right-hand corner is where the build
+   * strip lives and it is the furthest point on the screen from a thumb that
+   * is already holding a phone; this corner is the one you can reach without
+   * shifting your grip, which for a button pressed while something is chasing
+   * you is the only thing that matters.
+   */
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  gap: 8px;
+}
+
+.tap {
+  position: relative;
+  transition: transform 90ms ease-out, filter 90ms ease-out;
+  /*
+   * As big as four of them will go across the narrowest phone worth
+   * supporting. 72px is a comfortable thumb target; the vw cap is what keeps
+   * the row on one line at 320px rather than wrapping it into a block that
+   * would then sit on top of the build strip.
+   */
+  width: min(72px, 21vw);
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.62);
+  border: 2px solid rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(255, 212, 121, 0.5);
+  cursor: pointer;
+  pointer-events: auto;
+  /* These are pressed while something is chasing you, so they have to be
+     hittable without looking at them. */
+  touch-action: manipulation;
+}
+
+/* The loaded round, and what the button does to it. */
+/*
+ * WHILE YOU ARE POINTING IT.
+ *
+ * The sheet's own arrow, spun to the drag. It is the only confirmation that a
+ * drag registered at all — without it, aiming a dash is done blind and the
+ * player finds out whether it worked by watching where they end up.
+ */
+.tap-aiming { box-shadow: inset 0 0 0 3px var(--gold); }
+.tap-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 20px;
+  margin: -10px 0 0 -23px;
+  background: url(/ui/arrow_cream.png) right center / 10px 20px no-repeat;
+  image-rendering: pixelated;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.tap-ammo { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); }
+.tap-swap {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+.tap .pixicon { margin: auto; }
+/* Grid, so the icon centres itself at whatever size the button resolved to. */
+.tap { display: grid; place-items: center; }
+.tap:active { transform: translateY(2px); }
+.tap-ready { box-shadow: inset 0 0 0 2px var(--gold); }
+.tap-on { box-shadow: inset 0 0 0 3px var(--xp); }
+
+/* Drains downward as the cooldown runs out, exactly like the build tiles. */
+.tap-cd {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  background: rgba(6, 8, 10, 0.72);
+  transition: height 120ms linear;
+  pointer-events: none;
+}
+.tap .bs-n { right: 3px; bottom: 1px; font-size: 9px; }
+
+/*
+ * THE BUILD STRIP STILL HAS TO GET OUT OF THE WAY.
+ *
+ * The bar moved to the left corner, but the strip wraps right-aligned across
+ * most of the width and a full build reached back into it. Lifted above the
+ * bar's height on touch, which also puts it where the thumb is not.
+ */
+.hud-touch .build { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+
+/* PAUSE. There is no ESC on a phone and this is the one control that is not
+   part of playing, so it is the one that has to be visible. */
+.tap-pause {
+  /* A flex child of `.hud-right`, above the clock, rather than positioned over
+     it: that column is right-aligned already and stacking is free, whereas
+     absolute placement would have needed a containing block and a reserved
+     gutter that is wrong on every other screen size. */
+  width: 46px;
+  height: 40px;
+  margin-bottom: 4px;
+  padding: 0;
+  font-family: var(--title);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--ink-dim);
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.tap-pause { pointer-events: auto; }
+.tap-pause:active { color: var(--ink); transform: translateY(1px); }
+
+/* THE AMMO RACK IS THE SWITCH. A separate button would say the same thing
+   twice, standing next to the thing that already says it. */
+/*
+ * AND THE OLD RACK GOES.
+ *
+ * It sat in this exact corner, and the action bar is a better version of the
+ * one thing it let you do — bigger, next to everything else you press, showing
+ * the round that is actually loaded. Two controls for one job, one of them
+ * thumb-sized, is worse than one.
+ */
+.hud-touch .ammo { display: none; }
+
+/* Nothing on this screen should flash blue when it is touched. */
+.hud button, .pill, .toggle, .card, .grab-key {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Notches and home bars. The HUD lives in the corners, which is exactly where
+   a phone puts its own furniture. */
+.hud-top {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.ammo { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+.build { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+
+/* Below this the icon has to shrink with the button or it overflows it. */
+@media (max-width: 400px) {
+  .tap .pixicon { width: 42px; height: 42px; }
+  .tapbar { gap: 6px; }
+}
+
+/* --------------------------------------------------------------- THE GRAB -- */
+
+.grab {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  animation: grabpulse 0.34s steps(2) infinite;
+}
+@keyframes grabpulse { 0% { opacity: 1 } 50% { opacity: 0.82 } 100% { opacity: 1 } }
+
+.grab-title {
+  font-family: var(--title);
+  font-size: clamp(16px, 4vw, 28px);
+  color: #ff6b6b;
+  text-shadow: 3px 3px 0 #000;
+  margin: 0;
+  letter-spacing: 3px;
+}
+
+.grab-keys { display: flex; gap: 14px; }
+
+.grab-key {
+  font-family: var(--title);
+  font-size: clamp(18px, 5vw, 34px);
+  width: 1.9em;
+  padding: 10px 0;
+  text-align: center;
+  color: #6b6558;
+  background: #1b1812;
+  border: 3px solid #3a342a;
+  text-shadow: 2px 2px 0 #000;
+  /* A <button> now, so that on a phone it can be pressed. With a keyboard it
+     is disabled and reads exactly as the label it has always been. */
+  line-height: 1;
+  cursor: default;
+}
+/* The prompt itself ignores the pointer so it never eats a shot; the two keys
+   have to opt back in, and only where they do anything. */
+.grab-key:not(:disabled) { pointer-events: auto; cursor: pointer; }
+.grab-key:not(:disabled):active { transform: translateY(2px); }
+/* Only the key that is actually wanted lights up. */
+.grab-key.hot {
+  color: #12180f;
+  background: var(--xp);
+  border-color: #dff0a0;
+  transform: translateY(-3px);
+}
+
+.grab-bar {
+  width: min(280px, 60vw);
+  height: 14px;
+  background: #1b1812;
+  border: 3px solid #3a342a;
+}
+.grab-fill { height: 100%; background: #9be8b0; }
+
+/* Bars still to empty, next to the boss's name. */
+.bossbar-pips { display: inline-flex; gap: 4px; margin-left: 10px; vertical-align: middle; }
+.bossbar-pips i {
+  width: 8px; height: 8px;
+  background: #3a2430;
+  border: 1px solid #000;
+}
+.bossbar-pips i.on { background: var(--boss); box-shadow: 0 0 5px var(--boss); }
+
+/* ------------------------------------------------------------- OBJECTIVE --
+   Act III asks for things a health bar cannot say. Sits directly above the
+   boss bar, in the same column of attention, and turns red rather than moving
+   or growing — a layout that shifts under the player mid-fight is worse than
+   one that is merely loud. */
+.objective {
+  position: absolute;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 14px;
+  background: rgba(0, 0, 0, 0.55);
+  /*
+   * Same chrome as every other bar and panel in the HUD: a black ground, a
+   * two-pixel hard border and an inset highlight. It used to have a soft
+   * one-pixel rounded border of its own, which made the one element that only
+   * appears in act three look like it came from a different game.
+   */
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.objective-label {
+  font-family: var(--title);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: var(--boss);
+  text-shadow: 1px 1px 0 #000;
+}
+.objective-value {
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-shadow: 1px 1px 0 #000;
+}
+.objective.urgent {
+  animation: objective-pulse 0.9s ease-in-out infinite;
+}
+.objective.urgent .objective-label { color: var(--hp); }
+@keyframes objective-pulse {
+  0%, 100% { background: rgba(0, 0, 0, 0.55); }
+  50% { background: rgba(60, 14, 14, 0.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .objective.urgent { animation: none; }
+}
+
+/* ------------------------------------------------------------ THE BUILD --
+   EVERY CARD THE PLAYER OWNS, in one strip, bottom right.
+
+   This was two strips: the cards that tick lived bottom-left with cooldowns
+   and keys, everything else lived here in smaller tiles. One build across two
+   corners meant two places to look to answer one question, and it made a stat
+   card feel like a lesser kind of thing to have picked. Now every card gets
+   the same tile in the same place; the ones that tick simply have more drawn
+   on them. */
+.build {
+  position: absolute;
+  right: 14px;
+  bottom: 22px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  gap: 4px;
+  width: min(340px, 46vw);
+  pointer-events: none;
+}
+
+.bs {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  /* The kick when the ability fires arrives as an inline transform on a
+     snapshot, and snapshots land fifteen times a second — without this it
+     would step rather than move. See `castFx`. */
+  transition: transform 90ms ease-out, filter 90ms ease-out;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+}
+
+.bs .pixicon { margin: 1px; }
+
+/* A power is a thing that acts; a stat is a number. The rail says which
+   without adding a second colour to the HUD. */
+.bs-power { box-shadow: inset 0 0 0 1px rgba(255, 212, 121, 0.55); }
+.bs-stat { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10); }
+
+/* Both of these have to beat the two rails above, so they come after. */
+.bs-ready { box-shadow: inset 0 0 0 1px var(--gold); }
+.bs-on { box-shadow: inset 0 0 0 2px var(--xp); }
+
+/* Drains downward as the cooldown runs out, so readiness is legible at a
+   glance without reading a number. Only ever on a card that ticks. */
+.bs-cd {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  background: rgba(6, 8, 10, 0.72);
+  transition: height 120ms linear;
+}
+
+.bs-n {
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  font-family: var(--title);
+  font-size: 7px;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* The key stamp on an ability that has one. Drawn after the cooldown so the
+   thing you press stays readable while the tile is dark.
+
+   A full-width bar across the top rather than a corner badge: the labels are
+   words, not letters — ESPAÇO is six characters — and a badge sized to fit "Q"
+   spills over the tile next to it the moment the word is longer. */
+.bs-key {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 2px 0 1px;
+  font-family: var(--title);
+  font-size: 5px;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: -0.3px;
+  color: #0d0f10;
+  background: var(--gold);
+  text-shadow: none;
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  .build { width: min(220px, 52vw); }
+  .bs { width: 28px; height: 28px; }
+  .bs .pixicon { width: 24px; height: 24px; }
+}
+
+/* ---- DOWN, AND ASKED TO COME BACK ---------------------------------------
+   NOT A PANEL, and that is the point.
+
+   Every other overlay in the game is a bamboo sign with a title on it, and
+   using one here would file dying alongside pausing. The canvas behind this
+   has already said everything there is to say — the colour has drained out of
+   it, there is blood where he was standing, nothing is moving — so this adds
+   one button and gets out of the way. No dim, no blur: the desaturation IS
+   the dim, and putting a second one over it would flatten a frame that was
+   deliberately left readable. */
+.overlay.downed {
+  background: none;
+  backdrop-filter: none;
+  place-items: center;
+  align-content: safe center;
+  pointer-events: none;
+}
+.downed-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  /* Only the button takes the pointer; the rest is a caption over the game. */
+  pointer-events: auto;
+  animation: downed-in 0.5s ease-out both;
+}
+.downed-tag {
+  font-family: var(--title);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: #d94f4f;
+  margin: 0;
+  text-shadow: 2px 2px 0 #000;
+}
+.downed-left {
+  font-family: var(--title);
+  font-size: 7px;
+  color: #9a9184;
+  margin: 0;
+  text-shadow: 1px 1px 0 #000;
+}
+.downed-in .pill { --pill: 4; font-size: 13px; }
+/* Up out of the floor, which is where he is. */
+@keyframes downed-in {
+  from { opacity: 0; transform: translateY(10px) }
+  to { opacity: 1; transform: none }
+}
+@media (prefers-reduced-motion: reduce) { .downed-in { animation: none } }
+
+/* ---- WHAT THE RUN WAS ---------------------------------------------------
+   A CARD, NOT A SIGN.
+
+   Every other overlay uses the bamboo panel, and the bamboo panel is a fixed
+   aspect that cannot be nine-sliced — its leaves and nodes are drawn at
+   heights somebody chose. This screen is a variable amount of content (a build
+   is one card or fourteen), so it gets a plain dark card with a brass rule
+   instead of a frame it would have to fight. */
+.runend {
+  width: min(560px, 100%);
+  background: rgba(10, 12, 14, 0.94);
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(255, 212, 121, 0.28), var(--panel-shadow);
+  padding: 18px 16px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* THE CARD SCROLLS, THE PAGE DOES NOT.
+     A full build is four tile rows, three name lists, the boss chips and a
+     dozen medals, which on a laptop in landscape is taller than the window.
+     Bounding it here keeps the overflow inside the card @ the overlay behind
+     it stays fixed, so this never turns into the loading-screen bug where the
+     whole app could be dragged around. */
+  max-height: min(92vh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 212, 121, 0.3) transparent;
+}
+
+.runend-verdict {
+  font-family: var(--title);
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--hp);
+  margin: 0;
+}
+.runend-verdict.win { color: #9bf08a; }
+
+/* The one thing on this screen the player did not already know, so it is the
+   one thing sized like a headline. */
+.runend-title {
+  font-family: var(--title);
+  font-size: clamp(13px, 3.4vw, 20px);
+  line-height: 1.25;
+  letter-spacing: 1px;
+  color: var(--gold);
+  margin: 0;
+  text-shadow: 2px 2px 0 #000;
+}
+.runend-why { font-size: 7px; line-height: 1.7; color: var(--ink-dim); margin: 0; }
+.runend-best {
+  font-family: var(--title);
+  font-size: 6px;
+  letter-spacing: 3px;
+  color: var(--xp);
+  margin: 0;
+}
+
+/* Three across, because nine figures in three rows of three is a shape the eye
+   takes in at once and a single column is a list you have to read. */
+.runend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 6px;
+  border-top: 1px solid rgba(255, 212, 121, 0.2);
+  border-bottom: 1px solid rgba(255, 212, 121, 0.2);
+  padding: 12px 0;
+}
+.fig { display: flex; flex-direction: column; gap: 4px; }
+.fig-k { font-family: var(--title); font-size: 5px; letter-spacing: 1px; color: #8b8271; }
+/* Tabular figures so the three columns line up on the decimal even though
+   every run puts different digits in them. */
+.fig-v {
+  font-family: var(--title);
+  font-size: 11px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.runend-sec { display: flex; flex-direction: column; gap: 5px; }
+.runend-h { font-family: var(--title); font-size: 5px; letter-spacing: 3px; color: #8b8271; margin: 0; }
+.runend-list { font-size: 7px; line-height: 1.9; color: var(--ink-dim); margin: 0; }
+
+.runend-medals { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.medal {
+  font-family: var(--title);
+  font-size: 5px;
+  letter-spacing: 0.5px;
+  color: #ffe08a;
+  background: rgba(255, 212, 121, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(255, 212, 121, 0.35);
+  padding: 4px 6px;
+}
+
+/* ---- THE BUILD, AS TILES -------------------------------------------------
+   Same 30px art, same rarity colour and same corner count the level-up screen
+   used when the player picked them, so the summary shows the build instead of
+   describing it. `auto-fit` rather than a fixed count: a run with two powers
+   centres two tiles, and a run with fourteen wraps them. */
+.runend-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+.rtile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px var(--rt, #8b8271);
+}
+.rtile.incomum { --rt: #8fe08a; }
+.rtile.raro { --rt: #6fd0ff; }
+.rtile.lendario { --rt: #ffb43d; box-shadow: inset 0 0 0 1px #ffb43d, 0 0 6px rgba(255, 180, 61, 0.35); }
+/* On the corner, over the art, the way the HUD does it. */
+.rtile-n {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  font-family: var(--title);
+  font-style: normal;
+  font-size: 6px;
+  color: var(--gold);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 1px 2px;
+  line-height: 1;
+}
+
+/* The bosses reuse the medal chip in the enemy's own green. */
+.medal.boss { color: var(--boss-hi); box-shadow: inset 0 0 0 1px rgba(111, 217, 122, 0.4); background: rgba(111, 217, 122, 0.08); }
+
+/* The reassurance under DEIXA PRA LÁ. Small and dim: it is there for the one
+   player who has not realised backing out is free, and invisible to everyone
+   who already has. */
+.swap-out {
+  font-size: 6px;
+  color: #8b8271;
+  text-align: center;
+  margin: 6px 0 0;
+}
+
+.runend-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.runend-actions .pill { --pill: 3; font-size: 10px; }
+/* Reserves its own line whatever it says, so pressing COPIAR does not push the
+   buttons up under the cursor that is about to press another one. */
+.runend-note { font-size: 6px; color: #7f7768; margin: 0; min-height: 1.6em; }
+
+/* A SHORT WINDOW DROPS THE PROSE, not the figures.
+   The build list and the "why" line are the two things here that are nice to
+   have; the grid and the title are the screen. Note this hides the whole
+   SECTION rather than just the list — a heading with nothing under it
+   reads as something that failed to load. */
+@media (max-height: 760px) {
+  .runend { gap: 7px; padding: 12px; }
+  .runend-grid { padding: 8px 0; }
+  /* The TILES stay @ they are the build, and they are small. What goes is the
+     prose: the "why" line and the card names under each row, both of which
+     are already in the PNG the SALVAR button writes. */
+  .runend-why, .runend-sec.build-sec .runend-list { display: none; }
+}
+
+/* ---- THE CARDS YOU ACTUALLY PRESS ---------------------------------------
+   MOST OF A BUILD IS A NUMBER. Six of the cards are a number that changed and
+   nothing else will ever happen about them; two or three are things the player
+   has to decide to use. Those were the same 34px tile in the same corner as
+   the numbers, which is how somebody owns a dash for ten minutes and never
+   presses it once.
+
+   Bigger, brighter, and they breathe when they are ready. Nothing here adds a
+   colour to the HUD — it is the gold that is already the game's "you can do
+   something" colour, used louder. */
+.bs-act {
+  width: 44px;
+  height: 44px;
+  box-shadow: inset 0 0 0 2px rgba(255, 212, 121, 0.6);
+}
+.bs-act .pixicon { margin: 3px; }
+/* Off the row, so the pressable ones read as a rank of their own without
+   needing a second container. */
+.build { align-items: flex-end; }
+
+/* READY, and saying so. A slow breath rather than a blink: the strip can have
+   three of these on it at once and three blinking tiles is an alarm. */
+.bs-act.bs-ready {
+  box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 0 rgba(255, 212, 121, 0.45);
+  animation: bs-breathe 1.9s ease-in-out infinite;
+}
+@keyframes bs-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 0 rgba(255, 212, 121, 0.35); }
+  50%      { box-shadow: inset 0 0 0 2px var(--gold), 0 0 7px 1px rgba(255, 212, 121, 0.5); }
+}
+
+/* I HEARD YOU.
+   The press landed but the cooldown has not cleared, so the ability is holding
+   it (see AbilityState.queue). Without this the player presses, nothing
+   happens for half a second, and they press again — which is the exact feeling
+   the buffer was added to remove. Cyan because it is the game's "running"
+   colour and this is a thing in flight. */
+.bs-queued {
+  box-shadow: inset 0 0 0 2px var(--xp) !important;
+  animation: bs-wait 0.42s ease-in-out infinite;
+}
+@keyframes bs-wait {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.5); }
+}
+
+/* THE RING IT THROWS WHEN IT GOES OFF.
+   The tile already scales and brightens on `fired`; that reads as the tile
+   reacting. This reads as something leaving it, which is what actually
+   happened. Purely decorative, so it never takes the pointer. */
+.bs-act::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--gold);
+  opacity: 0;
+  pointer-events: none;
+}
+.bs-act.bs-on::after,
+.bs-act.bs-fired::after { animation: bs-ring 0.42s ease-out; }
+@keyframes bs-ring {
+  from { opacity: 0.9; transform: scale(1); }
+  to   { opacity: 0;   transform: scale(1.85); }
+}
+
+/* ---- AND THE THUMB GETS AN ANSWER --------------------------------------- */
+.tap {
+  /* Snappier than the 90ms the tiles use: a finger is already on the glass, so
+     the response has to beat the finger leaving it. */
+  transition: transform 60ms ease-out, filter 60ms ease-out, box-shadow 60ms ease-out;
+}
+.tap:active {
+  transform: translateY(3px) scale(0.94);
+  filter: brightness(1.7);
+  box-shadow: inset 0 0 0 3px var(--gold);
+}
+/* Ready on a phone is worth more than ready on a keyboard: there is no key to
+   idly try, so the button has to volunteer. */
+.tap-ready { animation: bs-breathe 1.9s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-act.bs-ready, .bs-queued, .tap-ready, .bs-act::after { animation: none; }
+}
