@@ -1,10 +1,23 @@
 version: '3.8'
 
 services:
-  react-app:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./frontend/Dockerfile
     container_name: soul_frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
       - "8080:80"
+    command: nginx -g 'daemon off;'
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: soul_backend
+    ports:
+      - "4000:4000"
+    command: sh -lc "tail -f /dev/null"
